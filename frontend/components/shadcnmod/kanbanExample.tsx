@@ -1,15 +1,34 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { TASK_STATUS } from "@/lib/constants/task-status";
 import { Task } from "@/types/task";
 import KanbanColumn from "../kanban/kanbanColumn";
-
+import { DatePickerDemo } from "../user/DatePicker";
+import { toast } from "sonner";
+import { fetchTasksfromBackend } from "@/actions/tasks";
 // Sample tasks
 
 // Main Kanban Board
-const TaskKanbanBoard = ({ initialTasks }: { initialTasks: Task[] }) => {
-  const [tasks, setTasks] = useState<Task[]>(initialTasks);
+const TaskKanbanBoard = () => {
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchTasks = async () => {
+      setLoading(true);
+      try {
+        const data: Task[] = await fetchTasksfromBackend();
+        setTasks(data);
+      } catch (error) {
+        console.log("Error in fetching tasks : ", error);
+        toast.error(error?.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTasks();
+  }, []);
 
   const handleDrop = (taskId: string, newStatus: keyof typeof TASK_STATUS) => {
     setTasks((prevTasks) =>
@@ -31,6 +50,7 @@ const TaskKanbanBoard = ({ initialTasks }: { initialTasks: Task[] }) => {
           Drag and drop tasks to update their status
         </p>
       </div>
+      <DatePickerDemo />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {Object.keys(TASK_STATUS).map((status) => (

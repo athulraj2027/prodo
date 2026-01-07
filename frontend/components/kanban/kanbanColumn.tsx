@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import { TASK_STATUS } from "@/lib/constants/task-status";
 import { Task } from "@/types/task";
 import TaskCard from "../kanban/taskCard";
-import { Button } from "../ui/button";
 import CreateTaskBtn from "./CreateTaskBtn";
 
 const KanbanColumn = ({

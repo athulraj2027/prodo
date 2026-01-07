@@ -12,8 +12,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { X, Plus } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { TASK_TAG_LIST } from "@/lib/constants/task_tag";
 import { TASK_PRIORITIES } from "@/lib/constants/task_priority";
-import { TASK_TAG_LIST, TaskTag } from "@/lib/constants/task_tag";
 
 export default function CreateTaskForm({
   setCreateTask,
@@ -22,33 +23,34 @@ export default function CreateTaskForm({
 }) {
   const [selectedPriority, setSelectedPriority] = useState("MEDIUM");
   const [checkpoints, setCheckpoints] = useState([""]);
-  const [selectedTag, setSelectedTag] = useState<TaskTag | null>(null);
+  const [date, setDate] = useState<Date | undefined>(new Date());
+  const [selectedTag, setSelectedTag] = useState("");
 
-  const handlePriorityClick = (value: string) => {
+  const handlePriorityClick = (value) => {
     setSelectedPriority(selectedPriority === value ? "" : value);
   };
 
-  const handleTagClick = (tag: TaskTag) => {
-    setSelectedTag(tag);
+  const handleTagClick = (value) => {
+    setSelectedTag(selectedTag === value ? "" : value);
   };
 
   const addCheckpoint = () => {
     setCheckpoints([...checkpoints, ""]);
   };
 
-  const removeCheckpoint = (index: number) => {
+  const removeCheckpoint = (index) => {
     setCheckpoints(checkpoints.filter((_, i) => i !== index));
   };
 
-  const updateCheckpoint = (index: number, value: string) => {
+  const updateCheckpoint = (index, value) => {
     const newCheckpoints = [...checkpoints];
     newCheckpoints[index] = value;
     setCheckpoints(newCheckpoints);
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm p-6 flex items-center justify-center z-50">
-      <Card className="w-full max-w-3xl text-sm dark:bg-gray-900">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm p-6 flex items-center justify-center z-50 animate-in fade-in duration-200">
+      <Card className="w-full max-w-3xl text-sm animate-in zoom-in-95 slide-in-from-bottom-4 duration-300">
         <CardHeader>
           <CardTitle>Create a new task</CardTitle>
           <CardDescription>
@@ -101,6 +103,7 @@ export default function CreateTaskForm({
                   ))}
                 </div>
               </div>
+
               <div className="grid gap-2">
                 <Label>Tag</Label>
                 <div className="flex flex-wrap gap-2">
@@ -109,12 +112,12 @@ export default function CreateTaskForm({
                       key={tag.value}
                       type="button"
                       onClick={() => handleTagClick(tag.value)}
-                      className={`px-3 py-1.5 rounded-md text-xs font-medium border-2 transition-all duration-200
-          ${
-            selectedTag === tag.value
-              ? `${tag.color} ring-2 ring-offset-2 ring-blue-500 scale-105`
-              : `${tag.color} opacity-60`
-          }`}
+                      className={`px-3 py-1.5 rounded-md text-xs font-medium border-2 transition-all duration-200 ${
+                        selectedTag === tag.value
+                          ? tag.color +
+                            " ring-2 ring-offset-2 ring-blue-500 scale-105"
+                          : tag.color + " opacity-60"
+                      }`}
                     >
                       {tag.label}
                     </button>
@@ -139,7 +142,7 @@ export default function CreateTaskForm({
                 </Button>
               </div>
 
-              <div className="flex-1 overflow-y-auto max-h-70 space-y-2 pr-1">
+              <div className="flex-1 overflow-y-auto max-h-[180px] space-y-2 pr-1">
                 {checkpoints.map((checkpoint, index) => (
                   <div key={index} className="flex gap-2 items-center group">
                     <Input
@@ -163,6 +166,16 @@ export default function CreateTaskForm({
                   </div>
                 ))}
               </div>
+
+              <div className="grid gap-2 mt-2">
+                <Label>Due Date</Label>
+                <Calendar
+                  mode="single"
+                  selected={date}
+                  onSelect={setDate}
+                  className="rounded-md border text-xs scale-90 origin-top"
+                />
+              </div>
             </div>
           </div>
         </CardContent>
@@ -173,7 +186,7 @@ export default function CreateTaskForm({
           <Button
             type="button"
             variant="outline"
-            className="flex-1 dark:bg-gray-900"
+            className="flex-1"
             onClick={() => setCreateTask(false)}
           >
             Cancel
