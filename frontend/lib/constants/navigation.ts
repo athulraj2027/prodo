@@ -17,7 +17,7 @@ export const PUBLIC_NAV_ITEMS: NavItem[] = [
 
 export const AUTH_NAV_ITEMS: AuthNavItem[] = [
   { label: "Dashboard", link: "dashboard" },
-  { label: "DSA", link: "dsa" },
-  { label: "Analytics", link: "analytics" },
-  { label: "Goals", link: "goals" },
+  { label: "DSA", link: "dashboard/dsa" },
+  { label: "Analytics", link: "dashboard/analytics" },
+  { label: "Goals", link: "dashboard/goals" },
 ];

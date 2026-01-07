@@ -3,6 +3,7 @@ import { Cabin } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import Navbar from "@/components/Navbar";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 const cabin = Cabin({
   weight: "400", // Next.js allows 100-900
@@ -24,12 +25,14 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en">
-        <body className={`${cabin.variable} antialiased`}>
-          <header className="border-b">
-            <Navbar />
-          </header>
-          {children}
-        </body>
+        <TooltipProvider delayDuration={200}>
+          <body className={`${cabin.variable} antialiased`}>
+            <header className="border-b">
+              <Navbar />
+            </header>
+            {children}
+          </body>
+        </TooltipProvider>
       </html>
     </ClerkProvider>
   );

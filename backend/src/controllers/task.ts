@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 
 const getAllTasks = async (req: Request, res: Response) => {
   try {
+    res.status(200).json({ message: "All tasks retrieved successfully" });
   } catch (error) {}
 };
 
