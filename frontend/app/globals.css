@@ -6,8 +6,8 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --bg: 255 255 255;   /* white */
-  --fg: 0 0 0;         /* black */
+  --bg: 255 255 255; /* white */
+  --fg: 0 0 0; /* black */
   --border: oklch(0.922 0 0);
   --radius: 0.625rem;
   --background: oklch(1 0 0);
@@ -44,8 +44,8 @@
 
 /* DARK MODE */
 .dark {
-  --bg: 0 0 0;         /* black */
-  --fg: 255 255 255;   /* white */
+  --bg: 0 0 0; /* black */
+  --fg: 255 255 255; /* white */
   --border: oklch(1 0 0 / 10%);
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
@@ -87,6 +87,30 @@ body {
 body {
   background-color: rgb(var(--bg));
   color: rgb(var(--fg));
+}
+
+/* Minimal scrollbar */
+.scrollbar-minimal {
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+/* Chrome / Edge / Safari */
+.scrollbar-minimal::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-minimal::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-minimal::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1; /* slate-300 */
+  border-radius: 9999px;
+}
+
+.scrollbar-minimal::-webkit-scrollbar-thumb:hover {
+  background-color: #94a3b8; /* slate-400 */
 }
 
 @theme inline {

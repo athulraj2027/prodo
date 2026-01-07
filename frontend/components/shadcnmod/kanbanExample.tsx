@@ -24,7 +24,7 @@ const TaskKanbanBoard = ({ initialTasks }: { initialTasks: Task[] }) => {
   };
 
   return (
-    <div className="w-full h-screen bg-white dark:bg-black p-6">
+    <div className="w-full min-h-screen bg-white dark:bg-black p-6">
       <div className="mb-6">
         <h1 className="text-2xl font-bold mb-2">Task Board</h1>
         <p className="text-sm text-gray-600 dark:text-gray-400">

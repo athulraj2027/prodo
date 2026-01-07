@@ -22,7 +22,7 @@ const TaskSchema = new mongoose.Schema(
       type: String,
       enum: TASK_STATUS,
       required: true,
-      default: "BACKLOG",
+      default: "TODO",
     },
     priority: {
       type: String,
@@ -37,7 +37,7 @@ const TaskSchema = new mongoose.Schema(
     },
   },
   {
-    timestamps: true, // adds createdAt and updatedAt
+    timestamps: true,
   }
 );
 

@@ -3,9 +3,9 @@ export const TASK_STATUS = {
     id: "BACKLOG",
     name: "Backlog",
     color: "#64748b",
-    createBtn: true,
+    createBtn: false,
   },
-  TODO: { id: "TODO", name: "To Do", color: "#f59e0b", createBtn: false },
+  TODO: { id: "TODO", name: "To Do", color: "#f59e0b", createBtn: true },
   IN_PROGRESS: {
     id: "IN_PROGRESS",
     name: "In Progress",

@@ -49,7 +49,7 @@ const KanbanColumn = ({
       {/* Column Header */}
       <div className="flex items-center gap-2 mb-4">
         <div
-          className="w-3 h-3 rounded-full"
+          className="w-3 h-3 rounded-full flex justify-between"
           style={{ backgroundColor: statusConfig.color }}
         />
         <h2 className="font-semibold text-sm">{statusConfig.name}</h2>
