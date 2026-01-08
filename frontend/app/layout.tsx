@@ -4,6 +4,7 @@ import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import Navbar from "@/components/Navbar";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toaster } from "sonner";
 
 const cabin = Cabin({
   weight: "400", // Next.js allows 100-900
@@ -31,6 +32,7 @@ export default function RootLayout({
               <Navbar />
             </header>
             {children}
+            <Toaster richColors position="top-right" />
           </body>
         </TooltipProvider>
       </html>

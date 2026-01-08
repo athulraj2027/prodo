@@ -2,14 +2,22 @@
 import mongoose from "mongoose";
 import { TASK_PRIORITY, TASK_STATUS, TASK_TAG } from "../lib/constants/enums";
 
+const CheckpointSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true, trim: true },
+    completed: { type: Boolean, default: false },
+  },
+  { _id: false } // optional: avoid creating an _id for each checkpoint
+);
+
 const TaskSchema = new mongoose.Schema(
   {
     userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      type: String,
       required: true,
+      index: true,
     },
-    title: {
+    name: {
       type: String,
       required: true,
       trim: true,
@@ -23,6 +31,10 @@ const TaskSchema = new mongoose.Schema(
       enum: TASK_STATUS,
       required: true,
       default: "TODO",
+    },
+    checkpoints: {
+      type: [CheckpointSchema],
+      default: [],
     },
     priority: {
       type: String,

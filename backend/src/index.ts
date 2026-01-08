@@ -1,9 +1,11 @@
 import dotenv from "dotenv";
 dotenv.config();
 import express from "express";
+import { clerkMiddleware } from "@clerk/express";
 import cors from "cors";
 import v1Routes from "./routes/v1/index";
 import { connectDB } from "./helpers/db";
+import { requireAuth } from "./middlewares/clerkMiddleware";
 const app = express();
 const PORT = process.env.PORT;
 connectDB();
@@ -12,6 +14,8 @@ app.use(
 );
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(clerkMiddleware());
+app.use(requireAuth);
 app.use("/api/v1", v1Routes);
 
 app.listen(PORT, () =>
