@@ -5,12 +5,15 @@ import taskController from "../../controllers/task";
 router
   .route("/")
   .get(taskController.getAllTasks)
-  .post(taskController.createTask);
+  .post(taskController.createTask)
+  .delete(taskController.dltTask)
+  .patch(taskController.patchTask);
+  
 router
   .route("/:id")
   .put(taskController.editTask)
   .delete(taskController.dltTask)
   .get(taskController.getTaskById)
-  .patch(taskController.patchTask);
+  
 
 export default router;

@@ -19,6 +19,7 @@ import { validateCreateTaskForm } from "@/lib/validators";
 import { createTask } from "@/actions/tasks";
 import { toast } from "sonner";
 import { useAuth } from "@clerk/nextjs";
+import Loading from "../Loading";
 
 export default function CreateTaskForm({
   setCreateTask,
@@ -88,12 +89,7 @@ export default function CreateTaskForm({
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm p-6 flex items-center justify-center z-50 animate-in fade-in duration-200">
       <Card className="w-full max-w-3xl text-sm dark:bg-gray-900 animate-in zoom-in-95 slide-in-from-bottom-4 duration-300">
-        {loading && (
-          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/40 backdrop-blur-sm rounded-lg text-white">
-            <span className="loading loading-infinity loading-xl"></span>
-            <p className="mt-2 text-sm">Please wait</p>
-          </div>
-        )}
+        {loading && <Loading />}
         <form onSubmit={onSubmit}>
           <CardHeader>
             <CardTitle>Create a new task</CardTitle>

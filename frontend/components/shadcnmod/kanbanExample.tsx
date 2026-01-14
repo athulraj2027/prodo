@@ -7,11 +7,13 @@ import KanbanColumn from "../kanban/kanbanColumn";
 import { DatePickerDemo } from "../user/DatePicker";
 import { toast } from "sonner";
 import { fetchTasksfromBackend } from "@/actions/tasks";
+import { useTasksStore } from "@/store/tasksStore";
 // Sample tasks
 
 // Main Kanban Board
 const TaskKanbanBoard = () => {
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const tasks = useTasksStore((state) => state.tasks);
+  const setTasks = useTasksStore((state) => state.setTasks);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -28,20 +30,26 @@ const TaskKanbanBoard = () => {
       }
     };
     fetchTasks();
-  }, []);
+  }, [setTasks]);
 
   const handleDrop = (taskId: string, newStatus: keyof typeof TASK_STATUS) => {
-    setTasks((prevTasks) =>
-      prevTasks.map((task) =>
-        task.id === taskId ? { ...task, status: newStatus } : task
-      )
-    );
+    // setTasks((prevTasks) =>
+    //   prevTasks.map((task) =>
+    //     task._id === taskId ? { ...task, status: newStatus } : task
+    //   )
+    // );
   };
 
   const getTasksByStatus = (status: keyof typeof TASK_STATUS) => {
     return tasks.filter((task) => task.status === status);
   };
 
+  if (loading)
+    return (
+      <div className="w-full min-h-screen bg-white dark:bg-black p-6 flex justify-center items-center">
+        <span className="loading loading-infinity loading-xl"></span>
+      </div>
+    );
   return (
     <div className="w-full min-h-screen bg-white dark:bg-black p-6">
       <div className="mb-6">

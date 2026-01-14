@@ -1,13 +1,18 @@
 import { Request, Response } from "express";
 import Task from "../models/task";
 
-const getAllTasks = async (req: Request, res: Response) => {
+const getAllTasks = async (req: any, res: any) => {
+  const userId = req.auth().userId;
+  if (!userId) return res.status(401).json({ error: "Unauthorized" });
   try {
-    console.log("get route called");
+    const tasks = await Task.find({ userId });
     res
       .status(200)
-      .json({ message: "All tasks retrieved successfully", tasks: [] });
-  } catch (error) {}
+      .json({ message: "All tasks retrieved successfully", tasks });
+  } catch (error) {
+    console.log("Error in fetching all tasks : ", error);
+    res.status(500).json({ error: "Server error" });
+  }
 };
 
 const getTaskById = async (req: Request, res: Response) => {
@@ -63,21 +68,60 @@ const editTask = async (req: Request, res: Response) => {
   } catch (error) {}
 };
 
-const patchTask = async (req: Request, res: Response) => {
+const patchTask = async (req: any, res: any) => {
+  const userId = req.auth().userId;
+  if (!userId) return res.status(401).json({ error: "Unauthorized" });
+  const { taskId } = req.query;
+  if (!taskId) return res.status(401).json({ error: "Task ID not found" });
+  const { checkpoint } = req.body;
+
+  const validCheckpoint = {
+    name: checkpoint.trim() || "Unnamed checkpoint",
+    completed: false,
+  };
   try {
-  } catch (error) {}
+    const updated = await Task.findOneAndUpdate(
+      { _id: taskId, userId },
+      {
+        $push: { checkpoints: validCheckpoint },
+      },
+      { new: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ error: "Task not found" });
+    }
+
+    res.json(updated);
+  } catch (error) {
+    console.log("Error in adding checkpoint : ", error);
+    res.status(500).json({ error: "Server error" });
+  }
 };
 
-const dltTask = async (req: Request, res: Response) => {
+const dltTask = async (req: any, res: any) => {
+  const userId = req.auth().userId;
+  if (!userId) return res.status(401).json({ error: "Unauthorized" });
+  const { taskId } = req.query;
+  if (!taskId) return res.status(401).json({ error: "Task ID not found" });
   try {
-  } catch (error) {}
+    await Task.deleteOne({ userId, _id: taskId });
+    const tasks = await Task.find({ userId, _id: taskId });
+
+    return res
+      .status(200)
+      .json({ message: "Task deleted successfully", tasks });
+  } catch (error) {
+    console.error("Delete task error:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
 };
 
 export default {
-  createTask,
+  createTask, // done
   editTask,
-  dltTask,
-  patchTask,
-  getAllTasks,
+  dltTask, //done
+  patchTask, // done
+  getAllTasks, // done
   getTaskById,
 };

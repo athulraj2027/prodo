@@ -1,11 +1,11 @@
 export type TaskPriority = "HIGH" | "MEDIUM" | "LOW";
 export type TaskCheckpoint = {
-  id: string;
-  text: string;
+  _id: string;
+  name: string;
   completed: boolean;
 };
 export type Task = {
-  id: string;
+  _id: string;
   name: string;
   description: string;
   status: "BACKLOG" | "TODO" | "IN_PROGRESS" | "COMPLETED";
@@ -13,4 +13,5 @@ export type Task = {
   timeSpent: number; // in seconds
   priority: TaskPriority;
   tag: string;
+  due_date: Date;
 };

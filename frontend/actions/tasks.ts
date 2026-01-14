@@ -12,7 +12,7 @@ export const fetchTasksfromBackend = async () => {
   return data.tasks;
 };
 
-export const createTask = async (formData: FormDataProps, token: any) => {
+export const createTask = async (formData: FormDataProps, token: string) => {
   const payload = {
     ...formData,
     date: formData.date.toISOString(),
@@ -29,6 +29,41 @@ export const createTask = async (formData: FormDataProps, token: any) => {
 
   if (!res.ok) {
     throw new Error("Failed to create task");
+  }
+
+  return res.json();
+};
+
+export const dltTasksAction = async (taskId: string, token: string) => {
+  const res = await fetch(`${API}/task?taskId=${taskId}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!res.ok) {
+    throw new Error("Failed to create task");
+  }
+
+  return res.json();
+};
+
+export const createCheckpointAction = async (
+  taskId: string,
+  token: string,
+  checkpoint: string
+) => {
+  const res = await fetch(`${API}/task?taskId=${taskId}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ checkpoint }),
+  });
+  if (!res.ok) {
+    throw new Error("Failed to create checkpoint");
   }
 
   return res.json();

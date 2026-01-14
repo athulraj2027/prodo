@@ -4,6 +4,8 @@ const TagBadge = ({ tag }: { tag: string }) => {
     Project: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
     Learning:
       "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400",
+    Side_project:
+      "bg-orange-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400",
   };
 
   return (

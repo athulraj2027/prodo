@@ -1,10 +1,17 @@
 "use client";
-import React, { useState } from "react";
-import { Clock, CheckCircle2, Circle, ChevronDown } from "lucide-react";
+import { useState } from "react";
+import {
+  Clock,
+  CheckCircle2,
+  Circle,
+  ChevronDown,
+  Calendar,
+} from "lucide-react";
 import PriorityBadge from "../kanban/priorityBadge";
 import TagBadge from "../kanban/tagBadge";
 import { Task } from "@/types/task";
 import { formatTime } from "@/lib/formatTime";
+import { useActiveTaskStore } from "@/store/activeTaskStore";
 
 const TaskCard = ({
   task,
@@ -13,6 +20,9 @@ const TaskCard = ({
   task: Task;
   onDragStart: (id: string) => void;
 }) => {
+  const setActiveTask = useActiveTaskStore((state) => state.setActiveTask);
+  const activeTask = useActiveTaskStore((state) => state.task);
+
   const [expanded, setExpanded] = useState(false);
   const completedCheckpoints = task.checkpoints.filter(
     (c) => c.completed
@@ -21,11 +31,33 @@ const TaskCard = ({
   const progress =
     totalCheckpoints > 0 ? (completedCheckpoints / totalCheckpoints) * 100 : 0;
 
+  const getDueColor = () => {
+    const now = new Date();
+    const due = new Date(task.due_date);
+
+    const diff = (due.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
+
+    if (diff <= 1) return "text-red-500";
+    if (diff <= 3) return "text-orange-500";
+    if (diff <= 7) return "text-yellow-500";
+    return "text-green-500";
+  };
+
   return (
     <div
       draggable
-      onDragStart={() => onDragStart(task.id)}
-      className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 cursor-grab active:cursor-grabbing hover:shadow-md transition-shadow"
+      onDragStart={() => onDragStart(task._id)}
+      className={`
+rounded-lg border p-4 cursor-grab active:cursor-grabbing 
+transition-all duration-300 ease-out
+hover:shadow-md 
+${
+  activeTask?._id === task._id
+    ? "bg-blue-50 dark:bg-blue-950 border-blue-500  shadow-lg animate-pulse-subtle"
+    : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+}
+`}
+      onClick={() => setActiveTask(task)}
     >
       {/* Header */}
       <div className="flex items-start justify-between gap-2 mb-2">
@@ -44,6 +76,19 @@ const TaskCard = ({
         <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
           <Clock className="w-3 h-3" />
           <span>{formatTime(task.timeSpent)}</span>
+        </div>
+      </div>
+      <div className="flex items-center gap-2 mb-3">
+        <Calendar className="w-3 h-3" />
+        <div className="flex items-center w-full justify-between text-xs text-gray-500 dark:text-gray-400">
+          <span className={`${getDueColor()} font-bold`}>
+            Due Date :{" "}
+            {new Date(task.due_date).toLocaleDateString("en-IN", {
+              day: "2-digit",
+              month: "short",
+              year: "numeric",
+            })}
+          </span>
         </div>
       </div>
 
@@ -85,7 +130,7 @@ const TaskCard = ({
         <div className="mt-3 space-y-2 pt-3 border-t border-gray-200 dark:border-gray-700">
           {task.checkpoints.map((checkpoint) => (
             <div
-              key={checkpoint.id}
+              key={checkpoint._id}
               className="flex items-center gap-2 text-xs"
             >
               {checkpoint.completed ? (
@@ -98,7 +143,7 @@ const TaskCard = ({
                   checkpoint.completed ? "line-through text-gray-500" : ""
                 }
               >
-                {checkpoint.text}
+                {checkpoint.name}
               </span>
             </div>
           ))}

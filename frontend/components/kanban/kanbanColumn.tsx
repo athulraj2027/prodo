@@ -67,7 +67,7 @@ const KanbanColumn = ({
         ) : (
           tasks.map((task) => (
             <TaskCard
-              key={task.id}
+              key={task._id}
               task={task}
               onDragStart={(id) => {
                 // Store task ID for drop handler

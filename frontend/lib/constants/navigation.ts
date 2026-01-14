@@ -20,4 +20,5 @@ export const AUTH_NAV_ITEMS: AuthNavItem[] = [
   { label: "DSA", link: "dashboard/dsa" },
   { label: "Analytics", link: "dashboard/analytics" },
   { label: "Goals", link: "dashboard/goals" },
+  { label: "Give Feedback", link: "dashboard/feedback" },
 ];
