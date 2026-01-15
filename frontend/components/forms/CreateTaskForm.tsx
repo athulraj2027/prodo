@@ -50,11 +50,11 @@ export default function CreateTaskForm({
     setCheckpoints([...checkpoints, ""]);
   };
 
-  const removeCheckpoint = (index) => {
+  const removeCheckpoint = (index: any) => {
     setCheckpoints(checkpoints.filter((_, i) => i !== index));
   };
 
-  const updateCheckpoint = (index, value: string) => {
+  const updateCheckpoint = (index: any, value: string) => {
     const newCheckpoints = [...checkpoints];
     newCheckpoints[index] = value;
     setCheckpoints(newCheckpoints);
@@ -77,6 +77,7 @@ export default function CreateTaskForm({
     setLoading(true);
     try {
       const token = await getToken();
+      if (!token) return;
       const data = await createTask(formData, token);
       console.log("data : ", data.newTask);
       addTask(data.newTask);

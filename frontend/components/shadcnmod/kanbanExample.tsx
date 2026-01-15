@@ -24,7 +24,7 @@ const TaskKanbanBoard = () => {
         setTasks(data);
       } catch (error) {
         console.log("Error in fetching tasks : ", error);
-        toast.error(error?.message);
+        toast.error("Error in fetching tasks");
       } finally {
         setLoading(false);
       }

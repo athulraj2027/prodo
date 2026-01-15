@@ -1,4 +1,5 @@
 export type TaskPriority = "HIGH" | "MEDIUM" | "LOW";
+type TagType = "DSA" | "Project" | "Learning" | "Side_project";
 export type TaskCheckpoint = {
   _id: string;
   name: string;
@@ -12,6 +13,6 @@ export type Task = {
   checkpoints: TaskCheckpoint[];
   timeSpent: number; // in seconds
   priority: TaskPriority;
-  tag: string;
+  tag: TagType;
   due_date: Date;
 };
