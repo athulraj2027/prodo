@@ -1,11 +1,9 @@
 import express from "express";
-import sessionRoutes from "./session";
-import taskRoutes from "./task";
-import userRoutes from "./user";
+import sessionRoutes from "./session.js";
+import taskRoutes from "./task.js";
 const router = express.Router();
 
 router.use("/task", taskRoutes);
 router.use("/session", sessionRoutes);
-router.use("/user", userRoutes);
 
 export default router;

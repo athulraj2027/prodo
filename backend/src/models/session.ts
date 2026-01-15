@@ -1,6 +1,6 @@
 // models/Session.ts
 import mongoose from "mongoose";
-import { SESSION_STATE } from "../lib/constants/enums";
+import { SESSION_STATE } from "../lib/constants/enums.js";
 
 const SessionSchema = new mongoose.Schema(
   {

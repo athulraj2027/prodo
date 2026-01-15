@@ -1,9 +1,9 @@
-import Task from "../models/task";
+import task from "../models/task.js";
 
 export default async function updateTaskStatus() {
   const today = new Date();
 
-  await Task.updateMany(
+  await task.updateMany(
     {
       status: { $ne: "COMPLETED" },
       due_date: { $lt: today },

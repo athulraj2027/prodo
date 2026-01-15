@@ -1,6 +1,6 @@
 import express from "express";
 const router = express.Router();
-import taskController from "../../controllers/task";
+import taskController from "../../controllers/task.js";
 
 router
   .route("/")

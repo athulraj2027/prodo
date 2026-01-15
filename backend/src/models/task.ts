@@ -1,6 +1,10 @@
 // models/Task.ts
 import mongoose from "mongoose";
-import { TASK_PRIORITY, TASK_STATUS, TASK_TAG } from "../lib/constants/enums";
+import {
+  TASK_PRIORITY,
+  TASK_STATUS,
+  TASK_TAG,
+} from "../lib/constants/enums.js";
 
 const CheckpointSchema = new mongoose.Schema({
   name: { type: String, required: true, trim: true },

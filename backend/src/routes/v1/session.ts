@@ -1,5 +1,5 @@
 import express from "express";
-import sessionController from "../../controllers/session";
+import sessionController from "../../controllers/session.js";
 const router = express.Router();
 
 router.post("/start", sessionController.startSession);

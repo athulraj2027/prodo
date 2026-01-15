@@ -1,12 +1,11 @@
-import { Request, Response } from "express";
-import Task from "../models/task";
 import mongoose from "mongoose";
+import task from "../models/task.js";
 
 const getAllTasks = async (req: any, res: any) => {
   const userId = req.auth().userId;
   if (!userId) return res.status(401).json({ error: "Unauthorized" });
   try {
-    const tasks = await Task.find({ userId });
+    const tasks = await task.find({ userId });
     res
       .status(200)
       .json({ message: "All tasks retrieved successfully", tasks });
@@ -16,7 +15,7 @@ const getAllTasks = async (req: any, res: any) => {
   }
 };
 
-const getTaskById = async (req: Request, res: Response) => {
+const getTaskById = async (req: any, res: any) => {
   try {
   } catch (error) {}
 };
@@ -43,7 +42,7 @@ export const createTask = async (req: any, res: any) => {
       completed: false,
     }));
 
-    const newTask = await Task.create({
+    const newTask = await task.create({
       userId,
       name: name.trim(),
       description: description?.trim() || "",
@@ -63,7 +62,7 @@ export const createTask = async (req: any, res: any) => {
   }
 };
 
-const editTask = async (req: Request, res: Response) => {
+const editTask = async (req: any, res: any) => {
   try {
   } catch (error) {}
 };
@@ -78,7 +77,7 @@ const patchTask = async (req: any, res: any) => {
   let updated;
 
   if (checkpoints && !checkpoint) {
-    const task = await Task.findOne({ _id: taskId, userId });
+    const neededTask = await task.findOne({ _id: taskId, userId });
 
     if (!task) {
       return res.status(404).json({ message: "Task not found" });
@@ -97,10 +96,10 @@ const patchTask = async (req: any, res: any) => {
       },
     }));
 
-    await Task.bulkWrite(bulkOps);
+    await task.bulkWrite(bulkOps);
 
     // 2. Fetch updated task
-    let updatedTask = await Task.findOne({ _id: taskId, userId });
+    let updatedTask = await task.findOne({ _id: taskId, userId });
 
     if (!updatedTask) return res.status(400).json({ message: "No task found" });
 
@@ -121,7 +120,7 @@ const patchTask = async (req: any, res: any) => {
     await updatedTask.save();
 
     // 3. Return fresh task
-    updatedTask = await Task.findOne({ _id: taskId, userId });
+    updatedTask = await task.findOne({ _id: taskId, userId });
 
     return res.json({
       success: true,
@@ -135,7 +134,7 @@ const patchTask = async (req: any, res: any) => {
     completed: false,
   };
   try {
-    updated = await Task.findOneAndUpdate(
+    updated = await task.findOneAndUpdate(
       { _id: taskId, userId },
       {
         $push: { checkpoints: validCheckpoint },
@@ -160,7 +159,7 @@ const dltTask = async (req: any, res: any) => {
   const { taskId } = req.query;
   if (!taskId) return res.status(401).json({ error: "Task ID not found" });
   try {
-    await Task.deleteOne({ userId, _id: taskId });
+    await task.deleteOne({ userId, _id: taskId });
     return res.status(200).json({ message: "Task deleted successfully" });
   } catch (error) {
     console.error("Delete task error:", error);

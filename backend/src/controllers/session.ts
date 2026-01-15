@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import type { Request, Response } from "express";
 
 const startSession = async (req: Request, res: Response) => {
   try {
