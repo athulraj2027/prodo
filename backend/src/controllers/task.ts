@@ -78,14 +78,13 @@ const patchTask = async (req: any, res: any) => {
   let updated;
 
   if (checkpoints && !checkpoint) {
-    console.log("updating checkpoints ... : ", checkpoints);
-
     const task = await Task.findOne({ _id: taskId, userId });
-    console.log("task : ", task);
 
     if (!task) {
       return res.status(404).json({ message: "Task not found" });
     }
+
+    // 1. Update checkpoints
     const bulkOps = checkpoints.map((cp: any) => ({
       updateOne: {
         filter: { _id: taskId, userId },
@@ -99,7 +98,30 @@ const patchTask = async (req: any, res: any) => {
     }));
 
     await Task.bulkWrite(bulkOps);
-    const updatedTask = await Task.findOne({ _id: taskId, userId });
+
+    // 2. Fetch updated task
+    let updatedTask = await Task.findOne({ _id: taskId, userId });
+
+    if (!updatedTask) return res.status(400).json({ message: "No task found" });
+
+    const total = updatedTask.checkpoints.length;
+    const completedCount = updatedTask.checkpoints.filter(
+      (cp) => cp.completed
+    ).length;
+    if (total > 0 && completedCount === total) {
+      updatedTask.status = "COMPLETED";
+    }
+
+    // Rule 2 → SOME completed
+    else if (completedCount > 0 && updatedTask.status !== "BACKLOG") {
+      updatedTask.status = "IN_PROGRESS";
+    }
+
+    // save if changed
+    await updatedTask.save();
+
+    // 3. Return fresh task
+    updatedTask = await Task.findOne({ _id: taskId, userId });
 
     return res.json({
       success: true,

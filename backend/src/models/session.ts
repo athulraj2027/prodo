@@ -5,14 +5,14 @@ import { SESSION_STATE } from "../lib/constants/enums";
 const SessionSchema = new mongoose.Schema(
   {
     userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      type: String,
       required: true,
+      index: true,
     },
     taskId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Task",
-      required: false,
+      required: true,
     },
     state: {
       type: String,

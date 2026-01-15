@@ -19,6 +19,7 @@ import {
   SignUpButton,
   UserButton,
 } from "@clerk/nextjs";
+import ComingSoonBadge from "./user/ComingSoonBadge";
 
 const Navbar = () => {
   const [theme, setTheme] = React.useState("light");
@@ -150,7 +151,8 @@ const Navbar = () => {
 
               <SignedIn>
                 {AUTH_NAV_ITEMS.map((item) => (
-                  <li key={item.label}>
+                  <li key={item.label} className="relative">
+                    {item.comingSoon && <ComingSoonBadge />}
                     <Link href={`/${item.link}`}>
                       <button
                         className={`
@@ -161,7 +163,9 @@ const Navbar = () => {
                           ? "hover:bg-gray-100 text-gray-700 hover:text-gray-900"
                           : "hover:bg-gray-800 text-gray-300 hover:text-white"
                       }
+                     
                     `}
+                        disabled={item.comingSoon}
                       >
                         {item.label}
                       </button>
