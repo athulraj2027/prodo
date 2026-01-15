@@ -46,8 +46,10 @@ export const validateCreateTaskForm = (formData: FormDataProps): boolean => {
   }
 
   // ---------- LENGTH VALIDATIONS ----------
-  if (name.trim().length < 5) {
-    toast.error("Task name must be at least 5 characters");
+  if (name.trim().length < 5 || name.trim().length > 20) {
+    toast.error(
+      "Task name must be at least 5 characters and maximum 20 characters"
+    );
     return false;
   }
 

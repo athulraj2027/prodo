@@ -1,4 +1,5 @@
 import { FormDataProps } from "@/lib/validators";
+import { TaskCheckpoint } from "@/types/task";
 const API = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export const fetchTasksfromBackend = async () => {
@@ -65,6 +66,24 @@ export const createCheckpointAction = async (
   if (!res.ok) {
     throw new Error("Failed to create checkpoint");
   }
+
+  return res.json();
+};
+
+export const updateCheckpointAction = async (
+  taskId: string,
+  token: string,
+  changed: TaskCheckpoint[]
+) => {
+  console.log("changed : ", changed);
+  const res = await fetch(`${API}/task?taskId=${taskId}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ checkpoints: changed }),
+  });
 
   return res.json();
 };

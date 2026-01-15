@@ -20,13 +20,14 @@ import { createTask } from "@/actions/tasks";
 import { toast } from "sonner";
 import { useAuth } from "@clerk/nextjs";
 import Loading from "../Loading";
+import { useTasksStore } from "@/store/tasksStore";
 
 export default function CreateTaskForm({
   setCreateTask,
 }: {
   setCreateTask: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
-  const [selectedPriority, setSelectedPriority] = useState("MEDIUM");
+  const [selectedPriority, setSelectedPriority] = useState("");
   const [checkpoints, setCheckpoints] = useState([""]);
   const [date, setDate] = useState<Date>(new Date());
   const [selectedTag, setSelectedTag] = useState("");
@@ -35,6 +36,7 @@ export default function CreateTaskForm({
   const [loading, setLoading] = useState(false);
 
   const { getToken } = useAuth();
+  const addTask = useTasksStore((state) => state.addTask);
 
   const handlePriorityClick = (value: string) => {
     setSelectedPriority(selectedPriority === value ? "" : value);
@@ -76,6 +78,8 @@ export default function CreateTaskForm({
     try {
       const token = await getToken();
       const data = await createTask(formData, token);
+      console.log("data : ", data.newTask);
+      addTask(data.newTask);
       toast.success("Task created successfully");
       setCreateTask(false);
     } catch (error) {

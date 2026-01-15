@@ -19,7 +19,11 @@ import { TASK_TAG_LIST } from "@/lib/constants/task_tag";
 import { TASK_STATUS } from "@/lib/constants/task-status";
 import DltTaskCard from "./DltTaskCard";
 import { useAuth } from "@clerk/nextjs";
-import { createCheckpointAction, dltTasksAction } from "@/actions/tasks";
+import {
+  createCheckpointAction,
+  dltTasksAction,
+  updateCheckpointAction,
+} from "@/actions/tasks";
 import { toast } from "sonner";
 import { useTasksStore } from "@/store/tasksStore";
 import CheckpointForm from "./CheckpointForm";
@@ -27,10 +31,12 @@ import CheckpointForm from "./CheckpointForm";
 const UtilityBar = () => {
   const task = useActiveTaskStore((state) => state.task);
   const setTask = useActiveTaskStore((state) => state.setActiveTask);
-  const setTasks = useTasksStore((state) => state.setTasks);
   const updateTask = useTasksStore((state) => state.updateTask);
+  const deleteTask = useTasksStore((state) => state.deleteTask);
   const [timeSpent, setTimeSpent] = useState(0);
   const [checkpoints, setCheckpoints] = useState(task?.checkpoints);
+  const [dirtyMap, setDirtyMap] = useState<{ [key: string]: boolean }>({});
+  const [isDirty, setIsDirty] = useState(false);
   const [dltModal, setDltModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [checkpointForm, setCheckpointForm] = useState(false);
@@ -38,6 +44,8 @@ const UtilityBar = () => {
   useEffect(() => {
     if (task?.checkpoints) {
       setCheckpoints(task.checkpoints);
+      setDirtyMap({});
+      setIsDirty(false);
     }
   }, [task]);
 
@@ -122,9 +130,10 @@ const UtilityBar = () => {
     setLoading(true);
     try {
       const token = await getToken();
-      if (!token) return;
-      const data = await dltTasksAction(task?._id as string, token);
-      setTasks(data.tasks);
+      if (!token || !task) return;
+      await dltTasksAction(task._id as string, token);
+      deleteTask(task);
+      setTask(null);
       toast.success("Task deleted successfully");
     } catch (error) {
       toast.error("Failed to delete task");
@@ -167,6 +176,34 @@ const UtilityBar = () => {
         cp._id === id ? { ...cp, completed: !cp.completed } : cp
       )
     );
+
+    setDirtyMap((prev) => ({ ...prev, [id]: true }));
+    setIsDirty(true);
+  };
+
+  const saveCheckpoints = async () => {
+    if (!isDirty) return;
+
+    setLoading(true);
+    const token = await getToken();
+    const changed = checkpoints?.filter((cp) => dirtyMap[cp._id]);
+    if (!changed || !task || !token) {
+      console.log("No changed array found");
+      return;
+    }
+    console.log("changed : ", changed);
+    try {
+      const data = await updateCheckpointAction(task._id, token, changed);
+      updateTask(data.task);
+      setDirtyMap({});
+      setIsDirty(false);
+      toast.success("Changes in checkpoints saved successfully");
+    } catch (err) {
+      toast.error("Syncing failed");
+      console.log("ERror in syncing checkpoints : ", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const completedCount = checkpoints
@@ -337,8 +374,17 @@ const UtilityBar = () => {
                 ))}
             </div>
           </div>
-          <Button className="bg-green-500 hover:bg-green-800 text-white mt-3">
-            Sync changes
+          <Button
+            disabled={!isDirty || loading}
+            onClick={saveCheckpoints}
+            className={`px-4 py-2 rounded transition
+  ${
+    isDirty
+      ? "bg-blue-600 text-white"
+      : "bg-gray-300 text-gray-500 cursor-not-allowed"
+  }`}
+          >
+            Save Changes
           </Button>
           <br />
           <Button className="bg-blue-500 hover:bg-blue-800 text-white mt-3">

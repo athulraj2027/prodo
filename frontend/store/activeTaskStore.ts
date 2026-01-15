@@ -3,7 +3,7 @@ import { create } from "zustand";
 
 interface ActiveTaskStore {
   task: Task | null;
-  setActiveTask: (task: Task) => void;
+  setActiveTask: (task: Task | null) => void;
 }
 export const useActiveTaskStore = create<ActiveTaskStore>((set) => ({
   task: null,

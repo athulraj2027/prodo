@@ -22,7 +22,6 @@ const TaskCard = ({
 }) => {
   const setActiveTask = useActiveTaskStore((state) => state.setActiveTask);
   const activeTask = useActiveTaskStore((state) => state.task);
-
   const [expanded, setExpanded] = useState(false);
   const completedCheckpoints = task.checkpoints.filter(
     (c) => c.completed
@@ -30,7 +29,6 @@ const TaskCard = ({
   const totalCheckpoints = task.checkpoints.length;
   const progress =
     totalCheckpoints > 0 ? (completedCheckpoints / totalCheckpoints) * 100 : 0;
-
   const getDueColor = () => {
     const now = new Date();
     const due = new Date(task.due_date);
@@ -81,7 +79,7 @@ ${
       <div className="flex items-center gap-2 mb-3">
         <Calendar className="w-3 h-3" />
         <div className="flex items-center w-full justify-between text-xs text-gray-500 dark:text-gray-400">
-          <span className={`${getDueColor()} font-bold`}>
+          <span className={`${getDueColor()} font-light`}>
             Due Date :{" "}
             {new Date(task.due_date).toLocaleDateString("en-IN", {
               day: "2-digit",
