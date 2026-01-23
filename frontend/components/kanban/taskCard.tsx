@@ -24,7 +24,7 @@ const TaskCard = ({
   const activeTask = useActiveTaskStore((state) => state.task);
   const [expanded, setExpanded] = useState(false);
   const completedCheckpoints = task.checkpoints.filter(
-    (c) => c.completed
+    (c) => c.completed,
   ).length;
   const totalCheckpoints = task.checkpoints.length;
   const progress =
@@ -73,7 +73,7 @@ ${
         <TagBadge tag={task.tag} />
         <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
           <Clock className="w-3 h-3" />
-          <span>{formatTime(task.timeSpent)}</span>
+          <span>{formatTime(task.timeSpent)} spent</span>
         </div>
       </div>
       <div className="flex items-center gap-2 mb-3">

@@ -50,7 +50,7 @@ const Navbar = () => {
           rounded-sm backdrop-blur-md
           border-2 
           transition-all duration-500 ease-in-out
-          hover:scale-110 hover:shadow-lg
+          hover:scale-102 hover:shadow-lg
           shadow-md
           ${
             theme === "light"

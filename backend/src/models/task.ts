@@ -48,11 +48,15 @@ const TaskSchema = new mongoose.Schema(
       enum: TASK_TAG,
       required: true,
     },
+    totalTimeSpent: {
+      type: Number, // seconds
+      default: 0,
+    },
     due_date: { type: Date, required: true },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // Indexes

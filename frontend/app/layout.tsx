@@ -5,6 +5,8 @@ import { ClerkProvider } from "@clerk/nextjs";
 import Navbar from "@/components/Navbar";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "sonner";
+import TimerRunner from "@/components/user/TimerRunner";
+import TimerDisplay from "@/components/user/TimerDisplay";
 
 const cabin = Cabin({
   weight: "400", // Next.js allows 100-900
@@ -28,6 +30,8 @@ export default function RootLayout({
       <html lang="en">
         <TooltipProvider delayDuration={200}>
           <body className={`${cabin.variable} antialiased`}>
+            <TimerRunner />
+            <TimerDisplay />
             <header className="border-b">
               <Navbar />
             </header>

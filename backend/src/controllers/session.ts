@@ -1,18 +1,50 @@
-import type { Request, Response } from "express";
+import session from "../models/session.js";
+import task from "../models/task.js";
 
-const startSession = async (req: Request, res: Response) => {
+const stopSession = async (req: any, res: any) => {
+  const userId = req.auth().userId;
+  if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+  const { taskId, duration } = req.body;
+
+  if (!taskId || !duration || duration < 1) {
+    return res.status(400).json({ message: "Invalid session data" });
+  }
+
   try {
+    const endedAt = new Date();
+    const startedAt = new Date(endedAt.getTime() - duration * 1000);
+
+    const sessionTask = await task.findOne({ _id: taskId, userId });
+    if (!sessionTask) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
+    // 1️⃣ Create session
+    await session.create({
+      userId,
+      taskId,
+      startedAt,
+      endedAt,
+      duration,
+    });
+
+    // 2️⃣ Update task total time
+    sessionTask.totalTimeSpent += duration;
+
+    // 3️⃣ Optional: auto status update
+    if (sessionTask.status === "TODO") {
+      sessionTask.status = "IN_PROGRESS";
+    }
+
+    await sessionTask.save();
+
+    return res.status(200).json({
+      success: true,
+      duration,
+      totalTimeSpent: sessionTask.totalTimeSpent,
+    });
   } catch (error) {}
 };
 
-const stopSession = async (req: Request, res: Response) => {
-  try {
-  } catch (error) {}
-};
-
-const getActiveSession = async (req: Request, res: Response) => {
-  try {
-  } catch (error) {}
-};
-
-export default { startSession, stopSession, getActiveSession };
+export default { stopSession };

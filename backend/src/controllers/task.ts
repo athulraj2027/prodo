@@ -5,7 +5,12 @@ const getAllTasks = async (req: any, res: any) => {
   const userId = req.auth().userId;
   if (!userId) return res.status(401).json({ error: "Unauthorized" });
   try {
-    const tasks = await task.find({ userId });
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tasks = await task.find({
+      userId,
+      $nor: [{ status: "COMPLETED", due_date: { $lt: today } }],
+    });
     res
       .status(200)
       .json({ message: "All tasks retrieved successfully", tasks });
@@ -105,15 +110,16 @@ const patchTask = async (req: any, res: any) => {
 
     const total = updatedTask.checkpoints.length;
     const completedCount = updatedTask.checkpoints.filter(
-      (cp) => cp.completed
+      (cp) => cp.completed,
     ).length;
     if (total > 0 && completedCount === total) {
       updatedTask.status = "COMPLETED";
-    }
-
-    // Rule 2 → SOME completed
-    else if (completedCount > 0 && updatedTask.status !== "BACKLOG") {
-      updatedTask.status = "IN_PROGRESS";
+    } else if (completedCount > 0) {
+      if (updatedTask.due_date.getTime() < Date.now()) {
+        updatedTask.status = "BACKLOG";
+      } else {
+        updatedTask.status = "IN_PROGRESS";
+      }
     }
 
     // save if changed
@@ -139,7 +145,7 @@ const patchTask = async (req: any, res: any) => {
       {
         $push: { checkpoints: validCheckpoint },
       },
-      { new: true }
+      { new: true },
     );
 
     if (!updated) {

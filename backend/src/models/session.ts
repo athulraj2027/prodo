@@ -1,6 +1,5 @@
 // models/Session.ts
 import mongoose from "mongoose";
-import { SESSION_STATE } from "../lib/constants/enums.js";
 
 const SessionSchema = new mongoose.Schema(
   {
@@ -14,25 +13,23 @@ const SessionSchema = new mongoose.Schema(
       ref: "Task",
       required: true,
     },
-    state: {
-      type: String,
-      enum: SESSION_STATE,
-      required: true,
-      default: "RUNNING",
-    },
     startedAt: {
       type: Date,
       required: true,
-      default: Date.now,
     },
     endedAt: {
       type: Date,
       required: false,
     },
+    duration: {
+      type: Number, // seconds
+      required: true,
+      min: 1,
+    },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // Indexes

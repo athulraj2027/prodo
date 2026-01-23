@@ -27,13 +27,16 @@ import {
 import { toast } from "sonner";
 import { useTasksStore } from "@/store/tasksStore";
 import CheckpointForm from "./CheckpointForm";
+import { useTimerStore } from "@/store/timerStore";
 
 const UtilityBar = () => {
   const task = useActiveTaskStore((state) => state.task);
   const setTask = useActiveTaskStore((state) => state.setActiveTask);
   const updateTask = useTasksStore((state) => state.updateTask);
   const deleteTask = useTasksStore((state) => state.deleteTask);
-  const [timeSpent, setTimeSpent] = useState(0);
+  const start = useTimerStore((state) => state.start);
+  const isRunning = useTimerStore((state) => state.isRunning);
+  // const [timeSpent, setTimeSpent] = useState(0);
   const [checkpoints, setCheckpoints] = useState(task?.checkpoints);
   const [dirtyMap, setDirtyMap] = useState<{ [key: string]: boolean }>({});
   const [isDirty, setIsDirty] = useState(false);
@@ -156,7 +159,7 @@ const UtilityBar = () => {
       const data = await createCheckpointAction(
         task?._id as string,
         token,
-        checkpoint
+        checkpoint,
       );
       console.log(data);
       updateTask(data);
@@ -173,8 +176,8 @@ const UtilityBar = () => {
   const toggleCheckpoint = (id: string) => {
     setCheckpoints(
       checkpoints?.map((cp) =>
-        cp._id === id ? { ...cp, completed: !cp.completed } : cp
-      )
+        cp._id === id ? { ...cp, completed: !cp.completed } : cp,
+      ),
     );
 
     setDirtyMap((prev) => ({ ...prev, [id]: true }));
@@ -204,6 +207,10 @@ const UtilityBar = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const startSession = async (taskId: string, taskName: string) => {
+    start(taskId, taskName);
   };
 
   const completedCount = checkpoints
@@ -387,9 +394,14 @@ const UtilityBar = () => {
             Save Changes
           </Button>
           <br />
-          <Button className="bg-blue-500 hover:bg-blue-800 text-white mt-3">
-            Start session
-          </Button>
+          {!isRunning && (
+            <Button
+              className="bg-blue-500 hover:bg-blue-800 text-white mt-3"
+              onClick={() => startSession(task._id, task.name)}
+            >
+              Start session
+            </Button>
+          )}
         </div>
       ) : (
         <div className="flex justify-center items-center h-100 w-full">
