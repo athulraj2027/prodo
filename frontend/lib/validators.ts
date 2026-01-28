@@ -25,11 +25,6 @@ export const validateCreateTaskForm = (formData: FormDataProps): boolean => {
     return false;
   }
 
-  if (!description || description.trim().length === 0) {
-    toast.error("Task description is required");
-    return false;
-  }
-
   if (!selectedPriority) {
     toast.error("Please select a priority");
     return false;
@@ -50,11 +45,6 @@ export const validateCreateTaskForm = (formData: FormDataProps): boolean => {
     toast.error(
       "Task name must be at least 5 characters and maximum 20 characters",
     );
-    return false;
-  }
-
-  if (description.trim().length < 10) {
-    toast.error("Description must be at least 10 characters");
     return false;
   }
 

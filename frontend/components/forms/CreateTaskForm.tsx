@@ -124,7 +124,7 @@ export default function CreateTaskForm({
                 </div>
 
                 <div className="grid gap-2">
-                  <Label htmlFor="description">Description</Label>
+                  <Label htmlFor="description">Description (optional)</Label>
                   <Textarea
                     id="description"
                     placeholder="Add some details for the task"
@@ -132,7 +132,6 @@ export default function CreateTaskForm({
                     rows={4}
                     name="description"
                     onChange={(e) => setDescription(e.target.value)}
-                    required
                   />
                 </div>
 
