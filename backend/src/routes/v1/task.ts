@@ -8,12 +8,13 @@ router
   .post(taskController.createTask)
   .delete(taskController.dltTask)
   .patch(taskController.patchTask);
-  
+
+router.get("/completed", taskController.getCompletedTasks);
+
 router
   .route("/:id")
   .put(taskController.editTask)
   .delete(taskController.dltTask)
-  .get(taskController.getTaskById)
-  
+  .get(taskController.getTaskById);
 
 export default router;

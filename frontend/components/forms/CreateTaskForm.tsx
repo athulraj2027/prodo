@@ -29,7 +29,7 @@ export default function CreateTaskForm({
 }) {
   const [selectedPriority, setSelectedPriority] = useState("");
   const [checkpoints, setCheckpoints] = useState([""]);
-  const [date, setDate] = useState<Date>(new Date());
+  const [date, setDate] = useState<Date | undefined>(undefined);
   const [selectedTag, setSelectedTag] = useState("");
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -70,6 +70,11 @@ export default function CreateTaskForm({
       selectedTag,
       date,
     };
+
+    if (!date) {
+      toast.error("Please select a date");
+      return;
+    }
     const isValid = validateCreateTaskForm(formData);
     console.log(isValid);
     if (!isValid) return;

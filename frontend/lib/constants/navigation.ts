@@ -20,6 +20,7 @@ export const AUTH_NAV_ITEMS: AuthNavItem[] = [
   { label: "Dashboard", link: "dashboard", comingSoon: false },
   // { label: "DSA dashboard", link: "dashboard/dsa", comingSoon: true },
   { label: "Analytics", link: "dashboard/analytics", comingSoon: false },
+  { label: "History", link: "dashboard/history", comingSoon: false },
   // { label: "Set Goals", link: "dashboard/goals", comingSoon: true },
   // { label: "Daily Tasks", link: "dashboard/daily-tasks", comingSoon: true },
   // { label: "Give Feedback", link: "dashboard/feedback", comingSoon: true },

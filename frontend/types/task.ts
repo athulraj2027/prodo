@@ -6,12 +6,13 @@ export type TaskCheckpoint = {
   completed: boolean;
 };
 export type Task = {
+  updatedAt: string | number | Date;
   _id: string;
   name: string;
   description: string;
   status: "BACKLOG" | "TODO" | "IN_PROGRESS" | "COMPLETED";
   checkpoints: TaskCheckpoint[];
-  timeSpent: number; // in seconds
+  totalTimeSpent: number; // in seconds
   priority: TaskPriority;
   tag: TagType;
   due_date: Date;

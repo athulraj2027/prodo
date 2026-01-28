@@ -16,7 +16,7 @@ export const fetchTasksfromBackend = async () => {
 export const createTask = async (formData: FormDataProps, token: string) => {
   const payload = {
     ...formData,
-    date: formData.date.toISOString(),
+    date: formData.date?.toISOString(),
   };
 
   const res = await fetch(`${API}/task`, {

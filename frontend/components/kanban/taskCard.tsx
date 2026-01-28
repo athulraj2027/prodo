@@ -73,7 +73,7 @@ ${
         <TagBadge tag={task.tag} />
         <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
           <Clock className="w-3 h-3" />
-          <span>{formatTime(task.timeSpent)} spent</span>
+          <span>{formatTime(task.totalTimeSpent)} spent</span>
         </div>
       </div>
       <div className="flex items-center gap-2 mb-3">

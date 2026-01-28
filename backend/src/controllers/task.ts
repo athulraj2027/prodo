@@ -173,6 +173,19 @@ const dltTask = async (req: any, res: any) => {
   }
 };
 
+const getCompletedTasks = async (req: any, res: any) => {
+  console.log("got request");
+  const userId = req.auth().userId;
+  if (!userId) return res.status(401).json({ error: "Unauthorized" });
+  try {
+    const tasks = await task.find({ userId, status: "COMPLETED" });
+    return res.json({ success: true, tasks });
+  } catch (error) {
+    console.error("Fetch completed tasks error:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 export default {
   createTask, // done
   editTask,
@@ -180,4 +193,5 @@ export default {
   patchTask, // done
   getAllTasks, // done
   getTaskById,
+  getCompletedTasks,
 };

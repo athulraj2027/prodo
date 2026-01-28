@@ -1,15 +1,15 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import {
-  Play,
+  // Play,
   Trash2,
   CheckCircle2,
   Circle,
   Calendar,
-  StopCircle,
+  // StopCircle,
   PlusIcon,
   Clock,
-  CheckCheckIcon,
+  // CheckCheckIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
@@ -28,6 +28,7 @@ import { toast } from "sonner";
 import { useTasksStore } from "@/store/tasksStore";
 import CheckpointForm from "./CheckpointForm";
 import { useTimerStore } from "@/store/timerStore";
+import { formatTime } from "@/lib/formatTime";
 
 const UtilityBar = () => {
   const task = useActiveTaskStore((state) => state.task);
@@ -286,7 +287,7 @@ const UtilityBar = () => {
               <Clock className="w-4 h-4 text-gray-500" />
               <div className="text-sm">
                 <span className="text-gray-500 dark:text-gray-400">
-                  Total time spent :
+                  Total time spent : {formatTime(task.totalTimeSpent)}
                 </span>
               </div>
             </div>
@@ -394,7 +395,7 @@ const UtilityBar = () => {
             Save Changes
           </Button>
           <br />
-          {!isRunning && (
+          {!isRunning && task.status !== "COMPLETED" && (
             <Button
               className="bg-blue-500 hover:bg-blue-800 text-white mt-3"
               onClick={() => startSession(task._id, task.name)}
