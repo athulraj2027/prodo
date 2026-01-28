@@ -32,10 +32,14 @@ export default function HistoryPage() {
   useEffect(() => {
     const getTasks = async () => {
       setLoading(true);
+      const token = await getToken();
       try {
         const res = await fetch(`${API}/task/completed`, {
           method: "GET",
-          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
         });
 
         if (!res.ok) {
