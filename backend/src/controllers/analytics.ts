@@ -1,14 +1,14 @@
 import session from "../models/session.js";
 
+const DELETED_TASK_ID = "DELETED_TASK";
+const DELETED_TASK_NAME = "Deleted Task";
+
 export const getAnalytics = async (req: any, res: any) => {
   try {
     const userId = req.auth().userId;
-    if (!userId) return res.status(401).json({ error: "Unauthorized" });
-
-    /* =========================
-       TIME BOUNDARIES
-    ========================= */
-    const now = new Date();
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
 
     const startOfToday = new Date();
     startOfToday.setHours(0, 0, 0, 0);
@@ -17,17 +17,47 @@ export const getAnalytics = async (req: any, res: any) => {
     startOfWeek.setDate(startOfWeek.getDate() - 6);
     startOfWeek.setHours(0, 0, 0, 0);
 
-    /* =========================
-       1. TODAY SESSIONS
-    ========================= */
-    const todaySessions = await session
-      .find({
-        userId,
-        startedAt: { $gte: startOfToday },
-      })
-      .populate("taskId", "name")
-      .sort({ startedAt: 1 })
-      .lean();
+    const todaySessions = await session.aggregate([
+      {
+        $match: {
+          userId,
+          startedAt: { $gte: startOfToday },
+        },
+      },
+      {
+        $lookup: {
+          from: "tasks",
+          localField: "taskId",
+          foreignField: "_id",
+          as: "task",
+        },
+      },
+      {
+        $unwind: {
+          path: "$task",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $addFields: {
+          normalizedTaskId: {
+            $cond: [
+              { $eq: ["$task.isDeleted", true] },
+              DELETED_TASK_ID,
+              { $toString: "$task._id" },
+            ],
+          },
+          normalizedTaskName: {
+            $cond: [
+              { $eq: ["$task.isDeleted", true] },
+              DELETED_TASK_NAME,
+              "$task.name",
+            ],
+          },
+        },
+      },
+      { $sort: { startedAt: 1 } },
+    ]);
 
     const todaySeconds = todaySessions.reduce((acc, s) => acc + s.duration, 0);
 
@@ -38,16 +68,13 @@ export const getAnalytics = async (req: any, res: any) => {
 
     const formattedTodaySessions = todaySessions.map((s) => ({
       sessionId: s._id.toString(),
-      taskId: (s.taskId as any)._id.toString(),
-      taskName: (s.taskId as any).name,
+      taskId: s.normalizedTaskId,
+      taskName: s.normalizedTaskName,
       startedAt: s.startedAt.toISOString(),
       endedAt: s.endedAt ? s.endedAt.toISOString() : "",
       durationSeconds: s.duration,
     }));
 
-    /* =========================
-       2. WEEKLY AGGREGATION
-    ========================= */
     const weeklyAgg = await session.aggregate([
       {
         $match: {
@@ -63,7 +90,12 @@ export const getAnalytics = async (req: any, res: any) => {
           as: "task",
         },
       },
-      { $unwind: "$task" },
+      {
+        $unwind: {
+          path: "$task",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
       {
         $addFields: {
           date: {
@@ -72,14 +104,28 @@ export const getAnalytics = async (req: any, res: any) => {
               date: "$startedAt",
             },
           },
+          normalizedTaskId: {
+            $cond: [
+              { $eq: ["$task.isDeleted", true] },
+              DELETED_TASK_ID,
+              { $toString: "$task._id" },
+            ],
+          },
+          normalizedTaskName: {
+            $cond: [
+              { $eq: ["$task.isDeleted", true] },
+              DELETED_TASK_NAME,
+              "$task.name",
+            ],
+          },
         },
       },
       {
         $group: {
           _id: {
             date: "$date",
-            taskId: "$task._id",
-            taskName: "$task.name",
+            taskId: "$normalizedTaskId",
+            taskName: "$normalizedTaskName",
           },
           seconds: { $sum: "$duration" },
         },
@@ -89,7 +135,7 @@ export const getAnalytics = async (req: any, res: any) => {
           _id: "$_id.date",
           tasks: {
             $push: {
-              taskId: { $toString: "$_id.taskId" },
+              taskId: "$_id.taskId",
               taskName: "$_id.taskName",
               seconds: "$seconds",
             },
@@ -99,9 +145,6 @@ export const getAnalytics = async (req: any, res: any) => {
       { $sort: { _id: 1 } },
     ]);
 
-    /* =========================
-       3. NORMALIZE LAST 7 DAYS
-    ========================= */
     const last7Days = Array.from({ length: 7 }).map((_, i) => {
       const d = new Date();
       d.setDate(d.getDate() - (6 - i));
@@ -124,14 +167,25 @@ export const getAnalytics = async (req: any, res: any) => {
       0,
     );
 
-    /* =========================
-       4. TOP TASK (WEEK)
-    ========================= */
     const topTaskAgg = await session.aggregate([
       {
         $match: {
           userId,
           startedAt: { $gte: startOfWeek },
+        },
+      },
+      {
+        $lookup: {
+          from: "tasks",
+          localField: "taskId",
+          foreignField: "_id",
+          as: "task",
+        },
+      },
+      { $unwind: "$task" },
+      {
+        $match: {
+          "task.isDeleted": { $ne: true },
         },
       },
       {
@@ -162,9 +216,6 @@ export const getAnalytics = async (req: any, res: any) => {
           }
         : null;
 
-    /* =========================
-       FINAL RESPONSE
-    ========================= */
     res.status(200).json({
       summary: {
         todaySeconds,

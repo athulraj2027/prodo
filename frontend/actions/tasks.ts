@@ -39,12 +39,14 @@ export const createTask = async (formData: FormDataProps, token: string) => {
 };
 
 export const dltTasksAction = async (taskId: string, token: string) => {
+  const payload = { deleteTask: true };
   const res = await fetch(`${API}/task?taskId=${taskId}`, {
-    method: "DELETE",
+    method: "PATCH",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
+    body: JSON.stringify(payload),
   });
   if (!res.ok) {
     throw new Error("Failed to create task");

@@ -84,6 +84,13 @@ export const patchTask = async (req: any, res: any) => {
       return res.status(400).json({ error: "Task ID not found" });
     }
 
+    const { deleteTask } = req.body;
+
+    if (deleteTask) {
+      await task.findByIdAndUpdate({ _id: taskId }, { isDeleted: true });
+      return res.status(200).json({ message: "Task deleted successfully" });
+    }
+
     const { checkpoint, checkpoints } = req.body;
 
     if (Array.isArray(checkpoints) && !checkpoint) {
@@ -140,12 +147,6 @@ export const patchTask = async (req: any, res: any) => {
         task: updatedTask,
       });
     }
-
-    /**
-     * --------------------------------------------------
-     * CASE 2: Add a new checkpoint
-     * --------------------------------------------------
-     */
     if (checkpoint) {
       const validCheckpoint = {
         name: checkpoint.trim() || "Unnamed checkpoint",

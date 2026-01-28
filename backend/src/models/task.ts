@@ -48,6 +48,7 @@ const TaskSchema = new mongoose.Schema(
       enum: TASK_TAG,
       required: true,
     },
+    isDeleted: { type: Boolean, default: undefined },
     totalTimeSpent: {
       type: Number, // seconds
       default: 0,
