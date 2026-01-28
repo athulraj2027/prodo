@@ -37,7 +37,6 @@ const UtilityBar = () => {
   const deleteTask = useTasksStore((state) => state.deleteTask);
   const start = useTimerStore((state) => state.start);
   const isRunning = useTimerStore((state) => state.isRunning);
-  // const [timeSpent, setTimeSpent] = useState(0);
   const [checkpoints, setCheckpoints] = useState(task?.checkpoints);
   const [dirtyMap, setDirtyMap] = useState<{ [key: string]: boolean }>({});
   const [isDirty, setIsDirty] = useState(false);
@@ -92,8 +91,8 @@ const UtilityBar = () => {
         checkpoint,
       );
       console.log(data);
-      updateTask(data);
-      setTask(data);
+      updateTask(data.task);
+      setTask(data.task);
       toast.success("Checkpoint created successfully");
     } catch (error) {
       console.log("Error in creating checkpoint : ", error);
