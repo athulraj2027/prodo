@@ -9,6 +9,7 @@ const getAllTasks = async (req: any, res: any) => {
     today.setHours(0, 0, 0, 0);
     const tasks = await task.find({
       userId,
+      isDeleted: { $ne: true },
       $nor: [{ status: "COMPLETED", due_date: { $lt: today } }],
     });
     res
