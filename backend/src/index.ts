@@ -6,12 +6,13 @@ import cors from "cors";
 import v1Routes from "./routes/v1/index.js";
 import { connectDB } from "./helpers/db.js";
 import { requireAuth } from "./middlewares/clerkMiddleware.js";
-import updateTaskStatus from "./jobs/update.task.status.js";
+import { startCronJobs } from "./jobs/cron.js";
+
 const app = express();
 const PORT = process.env.PORT;
 connectDB();
 app.use(
-  cors({ origin: [process.env.FRONTEND_URL as string], credentials: true })
+  cors({ origin: [process.env.FRONTEND_URL as string], credentials: true }),
 );
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -19,8 +20,8 @@ app.use(clerkMiddleware());
 app.use(requireAuth);
 app.use("/api/v1", v1Routes);
 
-updateTaskStatus();
+startCronJobs();
 
 app.listen(PORT, () =>
-  console.log(`Server has been started at the port : ${PORT}`)
+  console.log(`Server has been started at the port : ${PORT}`),
 );
