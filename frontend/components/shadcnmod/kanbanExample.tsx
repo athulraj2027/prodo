@@ -8,10 +8,12 @@ import { DatePickerDemo } from "../user/DatePicker";
 import { toast } from "sonner";
 import { fetchTasksfromBackend } from "@/actions/tasks";
 import { useTasksStore } from "@/store/tasksStore";
+import { useAuth } from "@clerk/nextjs";
 // Sample tasks
 
 // Main Kanban Board
 const TaskKanbanBoard = () => {
+  const { getToken } = useAuth();
   const tasks = useTasksStore((state) => state.tasks);
   const setTasks = useTasksStore((state) => state.setTasks);
   const [loading, setLoading] = useState(false);
@@ -20,7 +22,8 @@ const TaskKanbanBoard = () => {
     const fetchTasks = async () => {
       setLoading(true);
       try {
-        const data: Task[] = await fetchTasksfromBackend();
+        const token = await getToken();
+        const data: Task[] = await fetchTasksfromBackend(token as string);
         setTasks(data);
       } catch (error) {
         console.log("Error in fetching tasks : ", error);
@@ -30,7 +33,7 @@ const TaskKanbanBoard = () => {
       }
     };
     fetchTasks();
-  }, [setTasks]);
+  }, [setTasks, getToken]);
 
   const handleDrop = (taskId: string, newStatus: keyof typeof TASK_STATUS) => {
     // setTasks((prevTasks) =>

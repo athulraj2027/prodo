@@ -2,10 +2,13 @@ import { FormDataProps } from "@/lib/validators";
 import { TaskCheckpoint } from "@/types/task";
 const API = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-export const fetchTasksfromBackend = async () => {
+export const fetchTasksfromBackend = async (token: string) => {
   const res = await fetch(`${API}/task`, {
     method: "GET",
-    credentials: "include",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
   });
   if (!res.ok) throw new Error("Error in fetching the tasks");
   const data = await res.json();
@@ -53,7 +56,7 @@ export const dltTasksAction = async (taskId: string, token: string) => {
 export const createCheckpointAction = async (
   taskId: string,
   token: string,
-  checkpoint: string
+  checkpoint: string,
 ) => {
   const res = await fetch(`${API}/task?taskId=${taskId}`, {
     method: "PATCH",
@@ -73,7 +76,7 @@ export const createCheckpointAction = async (
 export const updateCheckpointAction = async (
   taskId: string,
   token: string,
-  changed: TaskCheckpoint[]
+  changed: TaskCheckpoint[],
 ) => {
   console.log("changed : ", changed);
   const res = await fetch(`${API}/task?taskId=${taskId}`, {
