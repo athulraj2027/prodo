@@ -2,13 +2,14 @@ import session from "../models/session.js";
 
 export const getAnalytics = async (req: any, res: any) => {
   try {
-    console.log("hi");
     const userId = req.auth().userId;
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
+    /* =========================
+       TIME BOUNDARIES
+    ========================= */
     const now = new Date();
 
-    // ---- Time boundaries ----
     const startOfToday = new Date();
     startOfToday.setHours(0, 0, 0, 0);
 
@@ -37,7 +38,7 @@ export const getAnalytics = async (req: any, res: any) => {
 
     const formattedTodaySessions = todaySessions.map((s) => ({
       sessionId: s._id.toString(),
-      taskId: s.taskId._id.toString(),
+      taskId: (s.taskId as any)._id.toString(),
       taskName: (s.taskId as any).name,
       startedAt: s.startedAt.toISOString(),
       endedAt: s.endedAt ? s.endedAt.toISOString() : "",
@@ -98,18 +99,33 @@ export const getAnalytics = async (req: any, res: any) => {
       { $sort: { _id: 1 } },
     ]);
 
-    const weeklyTaskBreakdown = weeklyAgg.map((d) => ({
-      date: d._id,
-      tasks: d.tasks,
-    }));
+    /* =========================
+       3. NORMALIZE LAST 7 DAYS
+    ========================= */
+    const last7Days = Array.from({ length: 7 }).map((_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() - (6 - i));
+      d.setHours(0, 0, 0, 0);
 
-    const weekSeconds = weeklyAgg.reduce(
-      (acc, d) => acc + d.tasks.reduce((t: number, x: any) => t + x.seconds, 0),
+      return {
+        date: d.toISOString().split("T")[0],
+        tasks: [],
+      };
+    });
+
+    const weeklyTaskBreakdown = last7Days.map((day) => {
+      const match = weeklyAgg.find((d) => d._id === day.date);
+      return match ? { date: match._id, tasks: match.tasks } : day;
+    });
+
+    const weekSeconds = weeklyTaskBreakdown.reduce(
+      (acc, day) =>
+        acc + day.tasks.reduce((t: number, x: any) => t + x.seconds, 0),
       0,
     );
 
     /* =========================
-       3. TOP TASK (WEEK)
+       4. TOP TASK (WEEK)
     ========================= */
     const topTaskAgg = await session.aggregate([
       {
@@ -146,7 +162,10 @@ export const getAnalytics = async (req: any, res: any) => {
           }
         : null;
 
-    const response = {
+    /* =========================
+       FINAL RESPONSE
+    ========================= */
+    res.status(200).json({
       summary: {
         todaySeconds,
         weekSeconds,
@@ -155,10 +174,7 @@ export const getAnalytics = async (req: any, res: any) => {
       },
       todaySessions: formattedTodaySessions,
       weeklyTaskBreakdown,
-    };
-
-    console.log(response);
-    res.status(200).json(response);
+    });
   } catch (err) {
     console.error("Analytics error", err);
     res.status(500).json({ message: "Failed to fetch analytics" });

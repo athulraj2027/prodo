@@ -59,77 +59,6 @@ const UtilityBar = () => {
 
   const { getToken } = useAuth();
 
-  // useEffect(() => {
-  //   let interval;
-  //   if (isTimerRunning) {
-  //     interval = setInterval(() => {
-  //       setTimeSpent((prev) => prev + 1);
-  //     }, 1000);
-  //   }
-  //   return () => clearInterval(interval);
-  // }, [isTimerRunning]);
-
-  // const formatTime = (seconds) => {
-  //   const hrs = Math.floor(seconds / 3600);
-  //   const mins = Math.floor((seconds % 3600) / 60);
-  //   const secs = seconds % 60;
-  //   return `${hrs.toString().padStart(2, "0")}:${mins
-  //     .toString()
-  //     .padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
-  // };
-
-  // useEffect(() => {
-  //   if (isTimerRunning) {
-  //     document.title = `${formatTime(timeSpent)} | prodo.`;
-  //   } else {
-  //     document.title = "prodo.";
-  //     // document.title.fontcolor = 'red'
-  //   }
-  // }, [timeSpent, isTimerRunning]);
-
-  // useEffect(() => {
-  //   let blinkInterval: any;
-
-  //   const drawDot = (color: string) => {
-  //     const canvas = document.createElement("canvas");
-  //     canvas.width = 64;
-  //     canvas.height = 64;
-
-  //     const ctx = canvas.getContext("2d");
-  //     if (!ctx) return;
-
-  //     ctx.clearRect(0, 0, 64, 64);
-
-  //     ctx.beginPath();
-  //     ctx.arc(32, 32, 28, 0, Math.PI * 2);
-  //     ctx.fillStyle = color;
-  //     ctx.fill();
-
-  //     let link = document.querySelector("link[rel='icon']") as HTMLLinkElement;
-
-  //     if (!link) {
-  //       link = document.createElement("link");
-  //       link.rel = "icon";
-  //       document.head.appendChild(link);
-  //     }
-
-  //     link.href = canvas.toDataURL("image/png");
-  //   };
-
-  //   if (isTimerRunning) {
-  //     let visible = true;
-
-  //     blinkInterval = setInterval(() => {
-  //       drawDot(visible ? "red" : "transparent");
-  //       visible = !visible;
-  //     }, 500); // blink speed
-  //   } else {
-  //     drawDot("black"); // stopped state
-  //   }
-
-  //   return () => clearInterval(blinkInterval);
-  // }, [isTimerRunning]);
-
   const dltTask = async () => {
     setLoading(true);
     try {
@@ -201,6 +130,7 @@ const UtilityBar = () => {
       updateTask(data.task);
       setDirtyMap({});
       setIsDirty(false);
+      setTask(data.task);
       toast.success("Changes in checkpoints saved successfully");
     } catch (err) {
       toast.error("Syncing failed");

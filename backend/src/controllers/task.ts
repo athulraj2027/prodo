@@ -72,90 +72,113 @@ const editTask = async (req: any, res: any) => {
   } catch (error) {}
 };
 
-const patchTask = async (req: any, res: any) => {
-  const userId = req.auth().userId;
-  if (!userId) return res.status(401).json({ error: "Unauthorized" });
-  const { taskId } = req.query;
-  if (!taskId) return res.status(401).json({ error: "Task ID not found" });
-  const { checkpoint, checkpoints } = req.body;
-
-  let updated;
-
-  if (checkpoints && !checkpoint) {
-    const neededTask = await task.findOne({ _id: taskId, userId });
-
-    if (!task) {
-      return res.status(404).json({ message: "Task not found" });
-    }
-
-    // 1. Update checkpoints
-    const bulkOps = checkpoints.map((cp: any) => ({
-      updateOne: {
-        filter: { _id: taskId, userId },
-        update: {
-          $set: {
-            "checkpoints.$[elem].completed": cp.completed,
-          },
-        },
-        arrayFilters: [{ "elem._id": new mongoose.Types.ObjectId(cp._id) }],
-      },
-    }));
-
-    await task.bulkWrite(bulkOps);
-
-    // 2. Fetch updated task
-    let updatedTask = await task.findOne({ _id: taskId, userId });
-
-    if (!updatedTask) return res.status(400).json({ message: "No task found" });
-
-    const total = updatedTask.checkpoints.length;
-    const completedCount = updatedTask.checkpoints.filter(
-      (cp) => cp.completed,
-    ).length;
-    if (total > 0 && completedCount === total) {
-      updatedTask.status = "COMPLETED";
-    } else if (completedCount > 0) {
-      if (updatedTask.due_date.getTime() < Date.now()) {
-        updatedTask.status = "BACKLOG";
-      } else {
-        updatedTask.status = "IN_PROGRESS";
-      }
-    }
-
-    // save if changed
-    await updatedTask.save();
-
-    // 3. Return fresh task
-    updatedTask = await task.findOne({ _id: taskId, userId });
-
-    return res.json({
-      success: true,
-      message: "Checkpoints updated successfully",
-      task: updatedTask,
-    });
-  }
-
-  const validCheckpoint = {
-    name: checkpoint.trim() || "Unnamed checkpoint",
-    completed: false,
-  };
+export const patchTask = async (req: any, res: any) => {
   try {
-    updated = await task.findOneAndUpdate(
-      { _id: taskId, userId },
-      {
-        $push: { checkpoints: validCheckpoint },
-      },
-      { new: true },
-    );
-
-    if (!updated) {
-      return res.status(404).json({ error: "Task not found" });
+    const userId = req.auth()?.userId;
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
     }
 
-    res.json(updated);
+    const { taskId } = req.query;
+    if (!taskId) {
+      return res.status(400).json({ error: "Task ID not found" });
+    }
+
+    const { checkpoint, checkpoints } = req.body;
+
+    if (Array.isArray(checkpoints) && !checkpoint) {
+      const existingTask = await task.findOne({ _id: taskId, userId });
+      if (!existingTask) {
+        return res.status(404).json({ message: "Task not found" });
+      }
+
+      // 1. Update checkpoint completed flags
+      const bulkOps = checkpoints.map((cp: any) => ({
+        updateOne: {
+          filter: { _id: taskId, userId },
+          update: {
+            $set: {
+              "checkpoints.$[elem].completed": cp.completed,
+            },
+          },
+          arrayFilters: [{ "elem._id": new mongoose.Types.ObjectId(cp._id) }],
+        },
+      }));
+
+      if (bulkOps.length > 0) {
+        await task.bulkWrite(bulkOps);
+      }
+
+      // 2. Re-fetch updated task
+      const updatedTask = await task.findOne({ _id: taskId, userId });
+      if (!updatedTask) {
+        return res.status(404).json({ message: "Task not found after update" });
+      }
+
+      // 3. Recompute task status (DERIVED STATE)
+      const total = updatedTask.checkpoints.length;
+      const completedCount = updatedTask.checkpoints.filter(
+        (cp) => cp.completed,
+      ).length;
+
+      if (total > 0 && completedCount === total) {
+        updatedTask.status = "COMPLETED";
+      } else if (completedCount > 0) {
+        updatedTask.status =
+          updatedTask.due_date && updatedTask.due_date.getTime() < Date.now()
+            ? "BACKLOG"
+            : "IN_PROGRESS";
+      } else {
+        updatedTask.status = "TODO"; // 👈 IMPORTANT FIX
+      }
+
+      await updatedTask.save();
+
+      return res.json({
+        success: true,
+        message: "Checkpoints updated successfully",
+        task: updatedTask,
+      });
+    }
+
+    /**
+     * --------------------------------------------------
+     * CASE 2: Add a new checkpoint
+     * --------------------------------------------------
+     */
+    if (checkpoint) {
+      const validCheckpoint = {
+        name: checkpoint.trim() || "Unnamed checkpoint",
+        completed: false,
+      };
+
+      const updatedTask = await task.findOneAndUpdate(
+        { _id: taskId, userId },
+        { $push: { checkpoints: validCheckpoint } },
+        { new: true },
+      );
+
+      if (!updatedTask) {
+        return res.status(404).json({ error: "Task not found" });
+      }
+
+      // Optional: ensure status isn't COMPLETED after adding new checkpoint
+      if (updatedTask.status === "COMPLETED") {
+        updatedTask.status = "IN_PROGRESS";
+        await updatedTask.save();
+      }
+
+      return res.json({
+        success: true,
+        message: "Checkpoint added successfully",
+        task: updatedTask,
+      });
+    }
+
+    return res.status(400).json({ error: "Invalid request body" });
   } catch (error) {
-    console.log("Error in adding checkpoint : ", error);
-    res.status(500).json({ error: "Server error" });
+    console.error("Error in patchTask controller:", error);
+    return res.status(500).json({ error: "Server error" });
   }
 };
 

@@ -15,6 +15,7 @@ import {
 import { useAuth } from "@clerk/nextjs";
 import { fetchAnalytics } from "@/actions/analytics";
 import { toast } from "sonner";
+import WeeklyTaskBreakdown from "@/components/analytics/WeeklyTaskBreakdown";
 
 type AnalyticsResponse = {
   summary: {
@@ -71,21 +72,11 @@ export default function AnalyticsPage() {
 
     getAnalytics();
   }, [getToken]);
-
   const formatTime = (seconds: number) => {
     const hrs = Math.floor(seconds / 3600);
     const mins = Math.floor((seconds % 3600) / 60);
     return `${hrs}h ${mins}m`;
   };
-
-  // const formatTimeDetailed = (seconds: number) => {
-  //   const hrs = Math.floor(seconds / 3600);
-  //   const mins = Math.floor((seconds % 3600) / 60);
-  //   const secs = seconds % 60;
-  //   return `${hrs.toString().padStart(2, "0")}:${mins
-  //     .toString()
-  //     .padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
-  // };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-IN", {
@@ -102,10 +93,10 @@ export default function AnalyticsPage() {
     });
   };
 
-  if (loading) {
+  if (loading || !analytics) {
     return (
       <div className="w-full min-h-screen bg-white dark:bg-black flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-gray-600" />
+        <span className="loading loading-infinity loading-xl"></span>
       </div>
     );
   }
@@ -283,77 +274,88 @@ export default function AnalyticsPage() {
           </div>
 
           {/* Bar Chart */}
-          <div className="h-64 flex items-end justify-between gap-2 mb-6">
-            {analytics!.weeklyTaskBreakdown.map((day, dayIndex) => {
-              const totalSeconds = day.tasks.reduce(
-                (sum, task) => sum + task.seconds,
-                0,
-              );
-              const heightPercentage = (totalSeconds / maxDailySeconds) * 100;
+          {/* Bar Chart */}
+          <div className="relative h-64 overflow-hidden">
+            <div className="absolute inset-0 flex items-end justify-between gap-2 px-2">
+              {analytics!.weeklyTaskBreakdown.map((day, dayIndex) => {
+                const BAR_MAX_HEIGHT = 256;
 
-              // Generate unique colors for each task
-              const taskColors = [
-                "bg-blue-500",
-                "bg-purple-500",
-                "bg-pink-500",
-                "bg-orange-500",
-                "bg-green-500",
-                "bg-yellow-500",
-                "bg-red-500",
-                "bg-indigo-500",
-                "bg-cyan-500",
-              ];
+                const totalSeconds = day.tasks.reduce(
+                  (sum, task) => sum + task.seconds,
+                  0,
+                );
 
-              return (
-                <div
-                  key={day.date}
-                  className="flex-1 flex flex-col items-center gap-2"
-                >
-                  {/* Stacked Bar */}
-                  <motion.div
-                    initial={{ height: 0 }}
-                    animate={{ height: `${heightPercentage}%` }}
-                    transition={{ delay: 0.7 + dayIndex * 0.1, duration: 0.5 }}
-                    className="w-full relative flex flex-col justify-end rounded-t-lg overflow-hidden"
-                    style={{ minHeight: totalSeconds > 0 ? "20px" : "0" }}
+                const safeMax = Math.max(maxDailySeconds, 1);
+                const barHeight = (totalSeconds / safeMax) * BAR_MAX_HEIGHT;
+
+                const taskColors = [
+                  "bg-blue-500",
+                  "bg-purple-500",
+                  "bg-pink-500",
+                  "bg-orange-500",
+                  "bg-green-500",
+                  "bg-yellow-500",
+                  "bg-red-500",
+                  "bg-indigo-500",
+                  "bg-cyan-500",
+                ];
+
+                return (
+                  <div
+                    key={day.date}
+                    className="flex-1 flex flex-col items-center gap-2"
                   >
-                    {day.tasks.map((task, taskIndex) => {
-                      const taskPercentage =
-                        (task.seconds / totalSeconds) * 100;
-                      return (
-                        <motion.div
-                          key={task.taskId}
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{
-                            delay: 0.8 + dayIndex * 0.1 + taskIndex * 0.05,
-                          }}
-                          className={`${
-                            taskColors[taskIndex % taskColors.length]
-                          } relative group cursor-pointer`}
-                          style={{ height: `${taskPercentage}%` }}
-                        >
-                          {/* Tooltip */}
-                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-black dark:bg-white text-white dark:text-black text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
-                            {task.taskName}: {formatTime(task.seconds)}
-                          </div>
-                        </motion.div>
-                      );
-                    })}
-                  </motion.div>
+                    {/* Stacked Bar */}
+                    <motion.div
+                      initial={{ height: 0 }}
+                      animate={{ height: barHeight }}
+                      transition={{
+                        delay: 0.7 + dayIndex * 0.1,
+                        duration: 0.5,
+                      }}
+                      className="w-full flex flex-col justify-end rounded-t-lg overflow-hidden"
+                    >
+                      {day.tasks.map((task, taskIndex) => {
+                        const taskHeight =
+                          totalSeconds === 0
+                            ? 0
+                            : (task.seconds / totalSeconds) * barHeight;
 
-                  {/* Date Label */}
-                  <div className="text-xs font-medium text-gray-600 dark:text-gray-400 text-center">
-                    {formatDate(day.date)}
-                  </div>
+                        return (
+                          <motion.div
+                            key={task.taskId}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{
+                              delay: 0.8 + dayIndex * 0.1 + taskIndex * 0.05,
+                            }}
+                            className={`${
+                              taskColors[taskIndex % taskColors.length]
+                            } relative group`}
+                            style={{ height: taskHeight }}
+                          >
+                            {/* Tooltip */}
+                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-black dark:bg-white text-white dark:text-black text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
+                              {task.taskName}: {formatTime(task.seconds)}
+                            </div>
+                          </motion.div>
+                        );
+                      })}
+                    </motion.div>
 
-                  {/* Total Time */}
-                  <div className="text-xs font-mono font-bold text-gray-900 dark:text-gray-100">
-                    {formatTime(totalSeconds)}
+                    {/* Date */}
+                    <div className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                      {formatDate(day.date)}
+                    </div>
+
+                    {/* Total */}
+                    <div className="text-xs font-mono font-bold text-gray-900 dark:text-gray-100">
+                      {formatTime(totalSeconds)}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
 
           {/* Legend */}
@@ -361,10 +363,11 @@ export default function AnalyticsPage() {
             <h3 className="text-sm font-semibold mb-3 text-gray-700 dark:text-gray-300">
               Tasks
             </h3>
+
             <div className="flex flex-wrap gap-3">
               {(() => {
-                // Get unique tasks from all days
                 const uniqueTasks = new Map<string, string>();
+
                 analytics!.weeklyTaskBreakdown.forEach((day) => {
                   day.tasks.forEach((task) => {
                     if (!uniqueTasks.has(task.taskId)) {
@@ -408,56 +411,9 @@ export default function AnalyticsPage() {
         </motion.div>
       </div>
 
-      {/* Task Breakdown */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.8 }}
-        className="mt-6 bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700"
-      >
-        <h2 className="text-xl font-bold mb-4">Weekly Task Breakdown</h2>
-
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="border-b border-gray-200 dark:border-gray-700">
-              <tr>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">
-                  Date
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">
-                  Task
-                </th>
-                <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">
-                  Time Spent
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-              {analytics!.weeklyTaskBreakdown.flatMap((day) =>
-                day.tasks.map((task, taskIndex) => (
-                  <motion.tr
-                    key={`${day.date}-${task.taskId}`}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.9 + taskIndex * 0.05 }}
-                    className="hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors"
-                  >
-                    <td className="px-4 py-3 text-sm">
-                      {formatDate(day.date)}
-                    </td>
-                    <td className="px-4 py-3 text-sm font-medium">
-                      {task.taskName}
-                    </td>
-                    <td className="px-4 py-3 text-sm font-mono text-right">
-                      {formatTime(task.seconds)}
-                    </td>
-                  </motion.tr>
-                )),
-              )}
-            </tbody>
-          </table>
-        </div>
-      </motion.div>
+      <WeeklyTaskBreakdown
+        weeklyTaskBreakdown={analytics.weeklyTaskBreakdown}
+      />
     </div>
   );
 }
