@@ -12,8 +12,7 @@ export const fetchTasksfromBackend = async (token: string) => {
   });
   if (!res.ok) throw new Error("Error in fetching the tasks");
   const data = await res.json();
-  console.log(`data received : ${data}`);
-  return data.tasks;
+  return data;
 };
 
 export const createTask = async (formData: FormDataProps, token: string) => {

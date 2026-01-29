@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import task from "../models/task.js";
+import session from "../models/session.js";
 
 const getAllTasks = async (req: any, res: any) => {
   const userId = req.auth().userId;
@@ -12,9 +13,33 @@ const getAllTasks = async (req: any, res: any) => {
       isDeleted: { $ne: true },
       $nor: [{ status: "COMPLETED", due_date: { $lt: today } }],
     });
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+
+    const result = await session.aggregate([
+      {
+        $match: {
+          userId,
+          startedAt: { $gte: startOfToday },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalSeconds: { $sum: "$duration" },
+        },
+      },
+    ]);
+
+    const timeSpentToday = result[0]?.totalSeconds || 0;
+
     res
       .status(200)
-      .json({ message: "All tasks retrieved successfully", tasks });
+      .json({
+        message: "All tasks retrieved successfully",
+        tasks,
+        timeSpentToday,
+      });
   } catch (error) {
     console.log("Error in fetching all tasks : ", error);
     res.status(500).json({ error: "Server error" });

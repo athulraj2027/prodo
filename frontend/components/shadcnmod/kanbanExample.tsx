@@ -9,6 +9,8 @@ import { toast } from "sonner";
 import { fetchTasksfromBackend } from "@/actions/tasks";
 import { useTasksStore } from "@/store/tasksStore";
 import { useAuth } from "@clerk/nextjs";
+import { Badge } from "../ui/badge";
+import { formatTime } from "@/lib/formatTime";
 // Sample tasks
 
 // Main Kanban Board
@@ -17,14 +19,16 @@ const TaskKanbanBoard = () => {
   const tasks = useTasksStore((state) => state.tasks);
   const setTasks = useTasksStore((state) => state.setTasks);
   const [loading, setLoading] = useState(false);
+  const [timeSpentToday, setTimeSpentToday] = useState(0);
 
   useEffect(() => {
     const fetchTasks = async () => {
       setLoading(true);
       try {
         const token = await getToken();
-        const data: Task[] = await fetchTasksfromBackend(token as string);
-        setTasks(data);
+        const data = await fetchTasksfromBackend(token as string);
+        setTasks(data.tasks);
+        setTimeSpentToday(data.timeSpentToday);
       } catch (error) {
         console.log("Error in fetching tasks : ", error);
         toast.error("Error in fetching tasks");
@@ -59,6 +63,10 @@ const TaskKanbanBoard = () => {
         <h1 className="text-2xl font-bold mb-2">Task Board</h1>
       </div>
       <DatePickerDemo />
+      <br />
+      <Badge className="bg-linear-to-bl from-indigo-500 via-purple-500 to-pink-500 text-white text-sm mb-3">
+        You worked for {formatTime(timeSpentToday)} today
+      </Badge>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {Object.keys(TASK_STATUS).map((status) => (
