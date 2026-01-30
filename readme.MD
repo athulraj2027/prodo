@@ -3,7 +3,8 @@ Productivity & Focus Tracker
 A personal productivity and focus-tracking application built for me and my friends to work with structured sessions, tasks, timers, and analytics.
 
 This project is designed to solve a simple problem:
-working longer is not the same as working effectively.
+
+Working longer is not the same as working effectively.
 
 Instead of generic to-do lists, the app is built around time-bound sessions, real usage data, and clear analytics, so productivity is measured by what actually happened, not what was planned.
 
@@ -61,7 +62,6 @@ Protected APIs with proper authorization
 Cron and internal routes separated from user-authenticated routes
 
 Tech Stack
-
 Frontend
 
 Next.js
@@ -78,7 +78,7 @@ Node.js
 
 Express
 
-mongoDB
+MongoDB
 
 Clerk authentication
 
@@ -105,8 +105,7 @@ Built for real usage, not demo behavior
 This project is intentionally opinionated and structured to match how focused work actually happens.
 
 Current Status
-
-Implemented:
+Implemented
 
 Tasks
 
@@ -121,8 +120,7 @@ Secure authentication
 Cron-based background updates
 
 Planned Features
-
-DSA practice module
+DSA Practice Module
 
 Structured daily and weekly problem-solving
 
