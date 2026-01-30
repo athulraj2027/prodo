@@ -37,29 +37,41 @@ export default function TimerDisplay() {
       .padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
-  const stopSession = async (taskId: string | null) => {
+  const syncStopSession = async (taskId: string, duration: number) => {
     try {
-      const token = (await getToken()) as string;
-      if (!taskId) return;
-      const duration = stop();
-      console.log(duration);
-      const session = {
-        taskId,
-        endedAt: new Date(),
-        duration,
-      };
+      const token = (await getToken({ skipCache: true })) as string;
 
-      const data = await stopSessionAction(session, token);
-      if (!data.success) {
-        toast.error("Failed to stop session");
-        return;
-      }
-      toast.success("Session concluded successfully");
-    } catch (error) {
-      console.log("error : ", error);
-      toast.error("Failed to stop session");
+      await stopSessionAction(
+        {
+          taskId,
+          duration,
+          endedAt: new Date(),
+        },
+        token,
+      );
+
+      toast.success("Session synced", { id: "stop" });
+    } catch (err) {
+      console.error(err);
+
+      toast.error("Will sync when online", { id: "stop" });
+
+      // OPTIONAL: queue retry
     }
   };
+
+  const stopSession = (taskId: string | null) => {
+    if (!taskId) return;
+
+    // 1️⃣ Stop UI instantly
+    const duration = stop();
+
+    toast.loading("Stopping session...", { id: "stop" });
+
+    // 2️⃣ Backend sync async
+    syncStopSession(taskId, duration);
+  };
+
   // Update document title with timer
   useEffect(() => {
     if (isRunning) {
