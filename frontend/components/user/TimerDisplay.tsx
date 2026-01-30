@@ -5,12 +5,10 @@ import { Button } from "../ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { StopCircle, Timer, GripVertical } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useAuth } from "@clerk/nextjs";
 import { stopSessionAction } from "@/actions/session";
 import { toast } from "sonner";
 
 export default function TimerDisplay() {
-  const { getToken } = useAuth();
   const { elapsed, isRunning, taskId, taskName } = useTimerStore();
   const stop = useTimerStore((state) => state.stop);
   const [pulse, setPulse] = useState(false);
@@ -39,16 +37,11 @@ export default function TimerDisplay() {
 
   const syncStopSession = async (taskId: string, duration: number) => {
     try {
-      const token = (await getToken({ skipCache: true })) as string;
-
-      await stopSessionAction(
-        {
-          taskId,
-          duration,
-          endedAt: new Date(),
-        },
-        token,
-      );
+      await stopSessionAction({
+        taskId,
+        duration,
+        endedAt: new Date(),
+      });
 
       toast.success("Session synced", { id: "stop" });
     } catch (err) {

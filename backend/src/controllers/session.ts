@@ -20,7 +20,6 @@ const stopSession = async (req: any, res: any) => {
       return res.status(404).json({ message: "Task not found" });
     }
 
-    // 1️⃣ Create session
     await session.create({
       userId,
       taskId,
@@ -29,10 +28,8 @@ const stopSession = async (req: any, res: any) => {
       duration,
     });
 
-    // 2️⃣ Update task total time
     sessionTask.totalTimeSpent += duration;
 
-    // 3️⃣ Optional: auto status update
     if (sessionTask.status === "TODO") {
       sessionTask.status = "IN_PROGRESS";
     }

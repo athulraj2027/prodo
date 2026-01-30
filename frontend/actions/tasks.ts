@@ -2,20 +2,20 @@ import { FormDataProps } from "@/lib/validators";
 import { TaskCheckpoint } from "@/types/task";
 const API = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-export const fetchTasksfromBackend = async (token: string) => {
+export const fetchTasksfromBackend = async () => {
   const res = await fetch(`${API}/task`, {
     method: "GET",
     headers: {
-      Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
+    credentials: "include",
   });
   if (!res.ok) throw new Error("Error in fetching the tasks");
   const data = await res.json();
   return data;
 };
 
-export const createTask = async (formData: FormDataProps, token: string) => {
+export const createTask = async (formData: FormDataProps) => {
   const payload = {
     ...formData,
     date: formData.date?.toISOString(),
@@ -25,9 +25,9 @@ export const createTask = async (formData: FormDataProps, token: string) => {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(payload),
+    credentials: "include",
   });
 
   if (!res.ok) {
@@ -37,14 +37,14 @@ export const createTask = async (formData: FormDataProps, token: string) => {
   return res.json();
 };
 
-export const dltTasksAction = async (taskId: string, token: string) => {
+export const dltTasksAction = async (taskId: string) => {
   const payload = { deleteTask: true };
   const res = await fetch(`${API}/task?taskId=${taskId}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
     },
+    credentials: "include",
     body: JSON.stringify(payload),
   });
   if (!res.ok) {
@@ -56,16 +56,15 @@ export const dltTasksAction = async (taskId: string, token: string) => {
 
 export const createCheckpointAction = async (
   taskId: string,
-  token: string,
   checkpoint: string,
 ) => {
   const res = await fetch(`${API}/task?taskId=${taskId}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({ checkpoint }),
+    credentials: "include",
   });
   if (!res.ok) {
     throw new Error("Failed to create checkpoint");
@@ -76,7 +75,6 @@ export const createCheckpointAction = async (
 
 export const updateCheckpointAction = async (
   taskId: string,
-  token: string,
   changed: TaskCheckpoint[],
 ) => {
   console.log("changed : ", changed);
@@ -84,8 +82,8 @@ export const updateCheckpointAction = async (
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
     },
+    credentials: "include",
     body: JSON.stringify({ checkpoints: changed }),
   });
 

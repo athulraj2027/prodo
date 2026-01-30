@@ -7,6 +7,7 @@ export const fetchAnalytics = async (token: string) => {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
+    credentials: "include",
   });
 
   if (!response.ok) {

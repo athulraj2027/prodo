@@ -18,7 +18,6 @@ import { TASK_PRIORITIES } from "@/lib/constants/task_priority";
 import { TASK_TAG_LIST } from "@/lib/constants/task_tag";
 import { TASK_STATUS } from "@/lib/constants/task-status";
 import DltTaskCard from "./DltTaskCard";
-import { useAuth } from "@clerk/nextjs";
 import {
   createCheckpointAction,
   dltTasksAction,
@@ -56,14 +55,11 @@ const UtilityBar = () => {
   const tag = TASK_TAG_LIST.find((t) => t.value === task?.tag);
   const status = Object.values(TASK_STATUS).find((s) => s.id === task?.status);
 
-  const { getToken } = useAuth();
-
   const dltTask = async () => {
     setLoading(true);
     try {
-      const token = await getToken();
-      if (!token || !task) return;
-      await dltTasksAction(task._id as string, token);
+      if (!task) return;
+      await dltTasksAction(task._id as string);
       deleteTask(task);
       setTask(null);
       toast.success("Task deleted successfully");
@@ -83,11 +79,9 @@ const UtilityBar = () => {
     }
     setLoading(true);
     try {
-      const token = await getToken();
-      if (!token) return;
       const data = await createCheckpointAction(
         task?._id as string,
-        token,
+
         checkpoint,
       );
       console.log(data);
@@ -117,15 +111,14 @@ const UtilityBar = () => {
     if (!isDirty) return;
 
     setLoading(true);
-    const token = await getToken();
     const changed = checkpoints?.filter((cp) => dirtyMap[cp._id]);
-    if (!changed || !task || !token) {
+    if (!changed || !task ) {
       console.log("No changed array found");
       return;
     }
     console.log("changed : ", changed);
     try {
-      const data = await updateCheckpointAction(task._id, token, changed);
+      const data = await updateCheckpointAction(task._id, changed);
       updateTask(data.task);
       setDirtyMap({});
       setIsDirty(false);

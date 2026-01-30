@@ -18,7 +18,6 @@ import { TASK_PRIORITIES } from "@/lib/constants/task_priority";
 import { validateCreateTaskForm } from "@/lib/validators";
 import { createTask } from "@/actions/tasks";
 import { toast } from "sonner";
-import { useAuth } from "@clerk/nextjs";
 import Loading from "../Loading";
 import { useTasksStore } from "@/store/tasksStore";
 
@@ -35,7 +34,6 @@ export default function CreateTaskForm({
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const { getToken } = useAuth();
   const addTask = useTasksStore((state) => state.addTask);
 
   const handlePriorityClick = (value: string) => {
@@ -81,9 +79,7 @@ export default function CreateTaskForm({
 
     setLoading(true);
     try {
-      const token = await getToken();
-      if (!token) return;
-      const data = await createTask(formData, token);
+      const data = await createTask(formData);
       console.log("data : ", data.newTask);
       addTask(data.newTask);
       toast.success("Task created successfully");

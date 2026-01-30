@@ -8,14 +8,12 @@ import { DatePickerDemo } from "../user/DatePicker";
 import { toast } from "sonner";
 import { fetchTasksfromBackend } from "@/actions/tasks";
 import { useTasksStore } from "@/store/tasksStore";
-import { useAuth } from "@clerk/nextjs";
 import { Badge } from "../ui/badge";
 import { formatTime } from "@/lib/formatTime";
 // Sample tasks
 
 // Main Kanban Board
 const TaskKanbanBoard = () => {
-  const { getToken } = useAuth();
   const tasks = useTasksStore((state) => state.tasks);
   const setTasks = useTasksStore((state) => state.setTasks);
   const [loading, setLoading] = useState(false);
@@ -25,8 +23,7 @@ const TaskKanbanBoard = () => {
     const fetchTasks = async () => {
       setLoading(true);
       try {
-        const token = await getToken();
-        const data = await fetchTasksfromBackend(token as string);
+        const data = await fetchTasksfromBackend();
         setTasks(data.tasks);
         setTimeSpentToday(data.timeSpentToday);
       } catch (error) {
@@ -37,7 +34,7 @@ const TaskKanbanBoard = () => {
       }
     };
     fetchTasks();
-  }, [setTasks, getToken]);
+  }, [setTasks]);
 
   const handleDrop = (taskId: string, newStatus: keyof typeof TASK_STATUS) => {
     // setTasks((prevTasks) =>

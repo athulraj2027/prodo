@@ -46,10 +46,10 @@ const getAllTasks = async (req: any, res: any) => {
   }
 };
 
-const getTaskById = async (req: any, res: any) => {
-  try {
-  } catch (error) {}
-};
+// const getTaskById = async (req: any, res: any) => {
+//   try {
+//   } catch (error) {}
+// };
 
 export const createTask = async (req: any, res: any) => {
   try {
@@ -93,10 +93,10 @@ export const createTask = async (req: any, res: any) => {
   }
 };
 
-const editTask = async (req: any, res: any) => {
-  try {
-  } catch (error) {}
-};
+// const editTask = async (req: any, res: any) => {
+//   try {
+//   } catch (error) {}
+// };
 
 export const patchTask = async (req: any, res: any) => {
   try {
@@ -238,10 +238,10 @@ const getCompletedTasks = async (req: any, res: any) => {
 
 export default {
   createTask, // done
-  editTask,
+  // editTask,
   dltTask, //done
   patchTask, // done
   getAllTasks, // done
-  getTaskById,
+  // getTaskById,
   getCompletedTasks,
 };
